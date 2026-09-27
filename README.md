@@ -303,6 +303,44 @@ Figura 11 - Linhagem dos dados da tabela fato_corrida_mensal
 <img width="1506" height="563" alt="image" src="https://github.com/user-attachments/assets/2fa9437c-e802-487d-94ac-4a9b103cdf55" />
 Figura 12 - Linhagem dos dados da tabela fato_corridas_suspeitas
 
+ ##### **fato_inflacao_cpi**
+
+>A tabela contém dados do "Consumer Price Index" (CPI) dos Estados Unidos, referente ao indicador de inflação do pais. A tabela registra os índices de inflação urbana >(CPI-U) e do segmento de transportes (CPI-T)
+>Os dados são divulgados mensalmente pelo "Bureau of Labor Statistics" (BLS), e pode ser consultado pelas bases de dados públicas da Reserva Federal Americana.
+>
+>Unidades: Índice 1982-1984=100, ajustado sazonalmente
+
+| Coluna       | Tipo     | Descrição                                                                                                                                                                                                                                                             |
+|--------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Data         | `date`   | Data de referência do índice de inflação.                                                                                                                                                                                                                             |
+| Indice_CPI_U | `double` | O índice "Consumer Price Index for All Urban Consumers" é um índice de preços de bens e serviços pagos por consumidores urbanos, e é considerado o indicador oficial de inflação americana. <br>---<br>Unidades: Índice 1982-1984=100, Ajustado sazonalmente.         |
+| Indice_CPI_T | `double` | O índice "Consumer Price Index for All Urban Consumers: Transportation in U.S. City Average" é um subtipo do índice CPI-U, e avalia a cesta de custos relacionadas ao segmento de transporte urbano.<br>---<br>Unidades: Índice 1982-1984=100, Ajustado sazonalmente. |
+
+<img width="1492" height="562" alt="image" src="https://github.com/user-attachments/assets/9df9c4df-5714-474c-9280-6212aa16f574" />
+Figura 12 - Linhagem dos dados da tabela fato_inflacao_cpi
+
+---
+#### 2.2 Screenshot do sistema de catálogo
+
+Segue abaixo a evidência da criação do sistema de catálogo, juntamente com a linhagem de algumas tabelas da camada bronze. Curiosamente, as tabelas bronze não estão visíveis na linhagem das tabelas gold.
+
+<img width="1911" height="1020" alt="image" src="https://github.com/user-attachments/assets/be9c006b-c8b1-441a-9145-6f21c10f4912" />
+Figura 13 - Screenshot do Unity Catalogue do Databricks. A imagem mostra a descrição da tabela "yellowtaxitripdata" da camada bronze.
+
+<img width="1503" height="837" alt="image" src="https://github.com/user-attachments/assets/fc2d7368-e2ab-49c5-9689-d1b187ebca14" />
+Figura 14 - Linhagem de dados da tabela "yellowtaxitripdata" da camada bronze.
+
+<img width="1501" height="823" alt="image" src="https://github.com/user-attachments/assets/a0b9e119-9f9b-4dd4-8eff-574003ef92e6" />
+Figura 15 - Linhagem de dados da tabela "greentaxitripdata" da camada bronze.
+
+<img width="1508" height="558" alt="image" src="https://github.com/user-attachments/assets/70dfb3ed-9c87-4abf-a77d-f7e9b4d73797" />
+Figura 16 - Linhagem de dados da tabela "forhirevehicleshighvolume" da camada silver.
+
+---
+#### 3. Pipeline de dados
+
+O 
+
 
 ---
 

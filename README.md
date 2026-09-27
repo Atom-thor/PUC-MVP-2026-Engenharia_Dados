@@ -207,7 +207,7 @@ Fatos criadas:
 | ID_Veiculo   | `string` | Código de referência para as empresas de transporte por aplicativo utilizado na tabela "forhirevehicleshighvolume", e ID de identificação criado para identificar taxis amarelos e verdes.<br> ---<br> - TA - Taxi Amarelo<br> - TV - Taxi Verde<br> - HV0002 - Juno<br> - HV0003 - Uber<br> - HV0004 - Via<br> - HV0005 - Lyft |
 | Categoria    | `string` | Informa a categoria macro de veículo no cadastro.<br> --- <br>Valores aceitos:<br> * Taxi - Para taxis amarelos e verdes<br> * For Hire Service - Para serviços de transporte por aplicativo.                                                                                                                       |
 
-  - Linhagem dos dados
+ ##### Linhagem dos dados
 
 <img width="1502" height="482" alt="image" src="https://github.com/user-attachments/assets/196804fb-2fb8-4f50-a4e6-8288974d3286" />
 Figura 7 - Linhagem de dados da tabela dim_tipo_veiculo.
@@ -225,6 +225,8 @@ Figura 7 - Linhagem de dados da tabela dim_tipo_veiculo.
 | Fl_Feriado       | `boolean` | Informa se a data é um feriado observado pelo estado de Nova Iorque (Federal/Estadual).                    |
 | Fl_Dia_Util      | `boolean` | Informa se a data é um dia útil ou não útil, considerando as condições da data de feriado e fim de semana. |
 
+ ##### Linhagem dos dados
+
 <img width="1488" height="463" alt="image" src="https://github.com/user-attachments/assets/dc4c0bc5-42b2-4814-b22f-0e4cd763541b" />
 Figura 8 - Linhagem de dados da tabela dim_calendario
 
@@ -238,6 +240,7 @@ Figura 8 - Linhagem de dados da tabela dim_calendario
 | Distrito     | `string` | Descrição do distrito referente à zona de taxi. É composto pelos 5 distritos oficiais, acrescido de "Desconhecido", "Não Disponível - N/A" e o Aeroporto Internacional Newark Liberty.                                                                                                                                                                                                      |
 | Zona         | `string` | Descrição dos bairros e aeroportos referentes à zona de taxi da TLC.                                                                                                                                                                                                                                                                                                                        |
 | Zona_Servico | `string` | Descreve a zona de serviço de taxis e veículos a um nível macro. É composto por áreas de aeroportos, distritais, áreas de pickup/street hail exclusivas para taxis amarelos, e valores não disponíveis (N/A).                                                                                                                                                                               |
+##### Linhagem dos dados
 
 <img width="1502" height="462" alt="image" src="https://github.com/user-attachments/assets/48182002-3726-4ef0-befd-47233628ae78" />
 Figura 9 - Linhagem de dados da tabela dim_zonas_de_taxi
@@ -258,6 +261,8 @@ Figura 9 - Linhagem de dados da tabela dim_zonas_de_taxi
 | ID_Destino    | `double` | Código de área de desembarque da TLC.<br>---<br>Valores aceitos: 1 - 265, exceto 264.                 |
 | Qtd_Viagens   | `bigint` | Quantidade total de viagens realizadas na agregação.                                                  |
 
+##### Linhagem dos dados
+
 <img width="1507" height="658" alt="image" src="https://github.com/user-attachments/assets/8e7a3917-bee9-49cb-baaa-660be7e9c308" />
 Figura 10 - Linhagem dos dados da tabela fato_demanda_horaria
 
@@ -274,6 +279,8 @@ Figura 10 - Linhagem dos dados da tabela fato_demanda_horaria
 | Qtd_Viagens           | `bigint`        | Quantidade total de viagens realizadas no período.                                                                                                                                                                                                                                                                              |
 | Tarifa_Base           | `decimal(12,2)` | Valor total da tarifa base do período cobrada ao passageiro, apurada via soma de "fare_amount" das bases de taxis amarelos e verdes, ou "base_passenger_fare". Não considera gorjetas, impostos e taxas adicionais.<br>Esse campo é apenas preenchido para taxis amarelos e verdes, e for hire services após fevereiro de 2019. |
 | Remuneracao_Motorista | `decimal(12,2)` | Remuneração total do motorista. O campo é apenas preenchido para veículos do tipo "For Hire Service" (ID_Veiculo entre HV0002 e HV0005)<br>O campo é calculado a partir da soma de "driver_pay" e "tips" da tabela "forhirevehicleshighvolume"                                                                                  |
+
+ ##### Linhagem dos dados
 
 <img width="1502" height="723" alt="image" src="https://github.com/user-attachments/assets/19793595-d779-435a-afea-2292fed7feb1" />
 Figura 11 - Linhagem dos dados da tabela fato_corrida_mensal
@@ -300,6 +307,8 @@ Figura 11 - Linhagem dos dados da tabela fato_corrida_mensal
 | Tipo_Tarifa           | `string` | Tarifa efetiva ao final da viagem.<br>---<br>- Taxa padrão (Standard fare)<br>- JFK <br>- Newark <br>- Nassau ou Westchester <br>- Taxa negociada (Negotiated fare)<br>- Viagem em grupo (Group ride)<br>- Nulo/Desconhecido |
 | Motivo_Irregularidade | `string` | Descrição do motivo de irregularidade da viagem.<br>---<br>- Embarque Fora de Nova Iorque<br>- Embarque em Aeroporto não negociado<br>- Embarque em zona de taxis amarelos                                                   |
 
+ ##### Linhagem dos dados
+
 <img width="1506" height="563" alt="image" src="https://github.com/user-attachments/assets/2fa9437c-e802-487d-94ac-4a9b103cdf55" />
 Figura 12 - Linhagem dos dados da tabela fato_corridas_suspeitas
 
@@ -315,6 +324,8 @@ Figura 12 - Linhagem dos dados da tabela fato_corridas_suspeitas
 | Data         | `date`   | Data de referência do índice de inflação.                                                                                                                                                                                                                             |
 | Indice_CPI_U | `double` | O índice "Consumer Price Index for All Urban Consumers" é um índice de preços de bens e serviços pagos por consumidores urbanos, e é considerado o indicador oficial de inflação americana. <br>---<br>Unidades: Índice 1982-1984=100, Ajustado sazonalmente.         |
 | Indice_CPI_T | `double` | O índice "Consumer Price Index for All Urban Consumers: Transportation in U.S. City Average" é um subtipo do índice CPI-U, e avalia a cesta de custos relacionadas ao segmento de transporte urbano.<br>---<br>Unidades: Índice 1982-1984=100, Ajustado sazonalmente. |
+
+ ##### Linhagem dos dados
 
 <img width="1492" height="562" alt="image" src="https://github.com/user-attachments/assets/9df9c4df-5714-474c-9280-6212aa16f574" />
 Figura 12 - Linhagem dos dados da tabela fato_inflacao_cpi

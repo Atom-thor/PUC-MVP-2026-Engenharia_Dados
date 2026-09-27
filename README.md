@@ -40,11 +40,30 @@ Para responder as perguntas de negócio, foram necessários conjuntos de dados b
 
 * Os conjuntos de registros de viagens da [TLC](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page) (`Yellow Taxi Trip Records`, `Green Taxi Trip Records`, `For Hire Vehicle Trip Records` e `High Volume For Hire Vehicle Trip Recods`) e suas tabelas auxiliares de consultas de zonas de táxi e conversão de códigos de base de despache de veículos para empresas de viagens por aplicativos credenciadas, disponibilizadas no site da TLC e no manual de uso do dataset ([Taxi Zone Lookup Table](https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv) e [trip_record_user_guide](https://www.nyc.gov/assets/tlc/downloads/pdf/trip_record_user_guide.pdf), respectivamente).
 
-* Os índices históricos do [Consumer Price Index for Urban Consumers (CPI-U)](https://fred.stlouisfed.org/series/CPIAUCSL) para o índice geral de inflação, e o [Consumer Price Index Urban Consumers: Transportation in U.S. City Average (CPI-T)](https://fred.stlouisfed.org/series/CPITRNSL), disponibilizados no site do Federal Reserve Bank of St. Louis (FRED).
+* Os índices históricos do [Consumer Price Index for Urban Consumers (CPI-U)](https://fred.stlouisfed.org/series/CPIAUCSL) para o índice geral de inflação, e o [Consumer Price Index Urban Consumers: Transportation in U.S. City Average (CPI-T)](https://fred.stlouisfed.org/series/CPITRNSL), disponibilizados no site do Federal Reserve Bank of St. Louis (FRED), sendo a fonte primária do dado o U.S. Bureau of Labor Statistics (BLS).
 
 * Registros de feriados federais e estaduais observados no estado de Nova Iorque, para as análises de dias úteis vs. não úteis. Os dados foram consumidos pela bilioteca `holidays` do python.
 
-* 
+### 1.3 Licenças de uso
+
+#### Dados de registros de viagens da TLC
+
+Os dados são disponibilizados como conjuntos de dados públicos (*public data sets*) da cidade de Nova Iorque, conforme a *Local Law 11 de 2012* que rege a publicação de dados no portal municipal. Os principais pontos aplicáveis são:
+
+- **Sem restrições de acesso**: os dados podem ser usados livremente, sem necessidade de registro, licença ou restrições de uso, desde que a fonte, a versão do conjunto de dados e quaisquer modificações realizadas sejam explicitamente identificadas por quem os disponibilizar a terceiros.
+- **Isenção de garantias**: os dados são fornecidos apenas para fins informativos. A cidade não garante a completude, exatidão, conteúdo ou adequação dos dados para qualquer finalidade específica.
+- **Isenção de responsabilidade**: a cidade não se responsabiliza por deficiências nos dados ou em aplicações de terceiros que os utilizem.
+
+<img width="1225" height="180" alt="image" src="https://github.com/user-attachments/assets/ea841483-9e8a-41b0-bff0-42674c5963ec" />
+
+#### Dados de índices de inflação da BLS, consumidos via FRED
+
+Como o U.S. Bureau of Labor Statistics é uma agência do governo federal americano, todas as informações publicadas, seja em mídias físicas ou eletrônicas são de domínio público. A agência libera o uso sem necessidade de autorização prévia, mas é solicitado que seja referenciada a fonte do dado.
+
+<img width="1286" height="185" alt="image" src="https://github.com/user-attachments/assets/cb7f2e32-38d6-4178-a1b0-8fce5bc7f333" />
+
+
+
 
 ### 1.2 Fontes dos Dados e Licenças de uso
 
@@ -52,16 +71,6 @@ A fonte primária dos dados foi o repositório de dados abertos da TLC. A carga 
 
 Os dados foram baixados a partir de 2016 e armazenados na camada landing, dedicada a cada tipo de base. A base de dados `High Volume For-Hire Vehicle (HVFHS)` teve seus registros iniciados apenas em fevereiro de 2019, e portanto sua coleta para o MVP também se iniciou nesse período.
 
-
-
-#### Termos de Uso do Dataset
-
-Os dados são disponibilizados como conjuntos de dados públicos (*public data sets*) da cidade de Nova Iorque, conforme a *Local Law 11 de 2012* que rege a publicação de dados no portal municipal. Os principais pontos aplicáveis são:
-
-- **Sem restrições de acesso**: os dados podem ser usados livremente, sem necessidade de registro, licença ou restrições de uso, desde que a fonte, a versão do conjunto de dados e quaisquer modificações realizadas sejam explicitamente identificadas por quem os disponibilizar a terceiros.
-- **Isenção de garantias**: os dados são fornecidos apenas para fins informativos. A cidade não garante a completude, exatidão, conteúdo ou adequação dos dados para qualquer finalidade específica.
-- **Isenção de responsabilidade**: a cidade não se responsabiliza por deficiências nos dados ou em aplicações de terceiros que os utilizem.
-- **Sem direito de ação privada**: a legislação não cria direito de ação privada para fazer cumprir suas disposições; o não cumprimento não gera responsabilidade para o órgão público.
 
 Referências
 ===

@@ -339,7 +339,26 @@ Figura 16 - Linhagem de dados da tabela "forhirevehicleshighvolume" da camada si
 ---
 #### 3. Pipeline de dados
 
-O 
+O pipeline de dados consiste em um notebook para cada etapa de transformação, iniciando-se na camada `staging` para o download dos arquivos `.parquet` dos datasets da TLC e feriados, seguindo para a camada `bronze` para a ingestão dos dados brutos, `silver` para aplicação de filtros de qualidade de dados e pequenas transformações de dados, e `gold` para a criação das agregações e aplicação de regras de negócio finais.
+
+Todas as tabelas são carregadas em Delta, no modo `overwrite`: cada execução do pipeline reprocessa a camada por completo a partir da anterior, não havendo carga incremental entre execuções.
+
+### Validação e unificação de schema (staging → bronze)
+
+Foi identificado nas etapas iniciais do trabalho que a criação das tabelas na camada `bronze` falhava por divergências de schema nas tabelas da TLC, seja por criação de colunas novas no decorrer dos anos, criação de coluna nova com grafia diferente mas persistência da coluna antiga (e vazia) no mesmo arquivo `.parquet` (`Airport_fee` e `airport_fee`), gerando erro de duplicidade de campos, tanto quanto por variações do tipo de dado de campos entre anos ou entre meses distintos de um mesmo ano (ex: campo registrado como `long`, `int` e `double` em arquivos distintos). Como o Databricks Free Edition não disponibiliza o recurso `mergeSchema`, a unificação de schema entre os arquivos `.parquet` mensais precisou ser feita manualmente. O processo seguiu os seguintes passos:
+
+1. Levantamento das divergências de schema campo a campo em todo o histórico de arquivos baixados de cada dataset, identificando variações de tipo, nome e presença de colunas ao longo dos anos.
+2. Definição de um `StructType` único por dataset, adotando o tipo de dado mais permissivo encontrado para cada campo (de forma a acomodar qualquer variação presente no histórico sem perda ou erro de conversão).
+3. Conversão do schema de cada arquivo `.parquet` para esse `StructType` definido, previamente à escrita na tabela `bronze`.
+4. Escrita dos dados: a primeira execução cria a tabela `bronze` já com o schema unificado; execuções subsequentes fazem o append dos dados já convertidos. Como mencionado, cada execução do notebook realiza um overwrite completo da camada, então o append ocorre apenas dentro da própria execução, arquivo a arquivo, e não entre execuções distintas do pipeline.
+
+### Qualidade de dados (bronze → silver)
+
+Entre as camadas `bronze` e `silver` é aplicada a etapa de qualidade de dados, responsável por filtrar e tratar inconsistências identificadas nos dados brutos antes de sua utilização nas camadas analíticas (detalhes na seção "Qualidade de Dados" deste documento).
+
+As etapas e notebooks utilizados no pipeline são descritas na tabela abaixo.
+
+
 
 
 ---

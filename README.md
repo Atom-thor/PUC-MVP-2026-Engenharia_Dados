@@ -60,10 +60,30 @@ Os dados são disponibilizados como conjuntos de dados públicos (*public data s
 
 Como o U.S. Bureau of Labor Statistics é uma agência do governo federal americano, todas as informações publicadas, seja em mídias físicas ou eletrônicas são de domínio público. A agência libera o uso sem necessidade de autorização prévia, mas é solicitado que seja referenciada a fonte do dado.
 
-<img width="1286" height="185" alt="image" src="https://github.com/user-attachments/assets/cb7f2e32-38d6-4178-a1b0-8fce5bc7f333" />
+> Licença completa disponível em: https://www.bls.gov/opub/copyright-information.htm
 
+#### Dados de feriados da biblioteca holidays
 
+A biblioteca `holidays` (Vacanza Team e colaboradores, incluindo dr-prodigy e ryanss) é distribuída sob a **Licença MIT**. A licença permite uso, cópia, modificação e distribuição livres, desde que o aviso de copyright original e a permissão de licença sejam mantidos junto ao software. O software é fornecido "como está", sem garantias de qualquer tipo.
 
+> Copyright (c) Vacanza Team and individual contributors (see CONTRIBUTORS file)
+> Copyright (c) dr-prodigy <dr.prodigy.github@gmail.com>, 2017-2023
+> Copyright (c) ryanss <ryanssdev@icloud.com>, 2014-2017
+>
+> Licença completa disponível em: https://github.com/vacanza/holidays/blob/dev/LICENSE
+
+### 1.4 Estrutura dos dados
+
+#### Dados da TLC
+
+| Tabela                        | Estrutura  | Observação |
+|-------------------------------|------------|------------|
+| Yellow Taxi Trip Records      | VendorID, tpep_pickup_datetime, tpep_dropoff_datetime, passenger_count, trip_distance, RatecodeID, store_and_fwd_flag, PULocationID, DOLocationID, payment_type, fare_amount, extra, mta_tax, tip_amount, tolls_amount, improvement_surcharge, total_amount, congestion_surcharge, airport_fee, cbd_congestion_fee | Estrutura obtida via [dicionário de dados do provedor](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf) |
+| Green Taxi Trip Records       | VendorID, lpep_pickup_datetime, lpep_dropoff_datetime, passenger_count, trip_distance, RatecodeID, store_and_fwd_flag, PULocationID, DOLocationID, payment_type, fare_amount, extra, mta_tax, tip_amount, tolls_amount, improvement_surcharge, total_amount, cbd_congestion_fee, congestion_surcharge, trip_type | Estrutura obtida via [dicionário de dados do provedor](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_green.pdf) |
+| For Hire Services             | Affiliated_base_number, pickup_datetime, dropOff_datetime, DOlocationID, PUlocationID, SR_Flag, dispatching_base_num | Estrutura obtida via [dicionário de dados do provedor](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_fhv.pdf) |
+| High Volume For Hire Services | originating_base_num, dispatching_base_num, request_datetime, on_scene_datetime, pickup_datetime, dropoff_datetime, DOLocationID, PULocationID, access_a_ride_flag, airport_fee, base_passenger_fare, bcf, cbd_congestion_fee, congestion_surcharge, driver_pay, hvfhs_license_num, sales_tax, shared_match_flag, shared_request_flag, tips, tolls, trip_miles, trip_time, wav_match_flag, wav_request_flag | Estrutura obtida via [dicionário de dados do provedor](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_hvfhs.pdf) |
+| fhv_base_lookup | High_Volume_License_Number, License_Number, App_Company_Affiliation| Estrutura copiada do [manual de uso do dataset](https://www.nyc.gov/assets/tlc/downloads/pdf/trip_record_user_guide.pdf) |
+| taxi_zone_lookup | LocationID, Borough, Zone, service_zone | Estrutura consultada diretamente da [fonte em .csv](https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv) |
 
 ### 1.2 Fontes dos Dados e Licenças de uso
 

@@ -106,7 +106,15 @@ Primeiramente foi criado um notebook `01. Preparação` para criação do catál
 - Silver: Para a materialização das tabelas com filtros de qualidade aplicados;
 - Gold: Para as tabelas dimensão e fato finais.
 
-Em sequência foi realizada a criação de volumes dedicados para cada tipo de dataset na camada `landing` por meio do notebook 
+O notebook em seguida cria volumes dedicados para cada tipo de dataset consumido, na camada `landing`:
+- yellow_taxi: Para download de arquivos `.parquet` da base de dados Yellow Taxi Trip Data;
+- green_taxi: Para download de arquivos `.parquet` da base de dados Green Taxi Trip Data;
+- fhv: Para download de arquivos `.parquet` da base de dados For Hire Vehicles Taxi Trip Data;
+- fhvhv: Para download de arquivos `.parquet` da base de dados High Volume For Hire Vehicles Taxi Trip Data;
+- taxi_zones: Para o download do arquivo `.csv` de consulta de distritos, bairros e zonas de serviço por ID de zona de táxi.
+- misc: Para o download de arquivos de outras naturezas não especificadas nos demais volumes.
+
+
 
 ### 1.2 Fontes dos Dados e Licenças de uso
 

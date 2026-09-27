@@ -99,7 +99,7 @@ A biblioteca `holidays` (Vacanza Team e colaboradores, incluindo dr-prodigy e ry
 |---------|------------|
 | feriados_us_ny (nome dado durante a ingestão na bronze) | date, holiday_name |
 
-### 2. Carga dos dados
+## 2. Carga dos dados
 
 O notebook [`01. Preparação`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/01.%20Prepara%C3%A7%C3%A3o.ipynb) realizou a criação do catálogo `MVP`, e schemas para cada etapa do pipeline:
 - Landing: Para o download dos dados brutos em volumes dedicados, explicitado a seguir;
@@ -124,7 +124,7 @@ Os dados de inflação e tabelas auxiliares de zonas de táxi e empresas afiliad
 A ingestão dos dados na camada bronze é abordada nos tópicos seguintes.
 
 ---
-#### 2.1 Evidências
+### 2.1 Evidências
 
 <img width="1287" height="697" alt="Captura de tela 2026-09-27 161223" src="https://github.com/user-attachments/assets/129debe1-20b3-4cba-8cab-8f659e3a593b" />
 Figura 2 - Log dos últimos downloads dos datasets da TLC, realizados pela função.  
@@ -144,7 +144,7 @@ Figura 4 - Função usada para consumo de dados de feriados.
 Figuras 5 e 6 - Bases de dados enviadas manualmente ao volume `misc` e `taxi_zones`
 
 
-### 2. Modelagem e Catálogo de Dados
+## 3. Modelagem e Catálogo de Dados
 
 Modelo de dados: Esquema estrela com 4 tabelas fato e 3 dimensões.
 
@@ -164,7 +164,7 @@ Fatos criadas:
 
 - **fato_corridas_suspeitas**: Tabela criada para responder à pergunta 4. Retorna as informações individuais de viagens que não cumprem a legislação municipal de operação de táxis amarelos e verdes.
 
-#### 2.1 Escolhas de modelagem realizadas
+### 3.1 Escolhas de modelagem realizadas
 
 - **dim_tipo_veiculo**: Para permitir que a dimensão possa ser usada para todos os tipos de veículos do dataset, independentemente de serem do tipo `taxi` ou `for hire services`, foi criada uma chave substituta para os táxis amarelos (`ID_Veiculo = "TA"`) e táxis verdes (`ID_Veiculo = "TV"`), definindo a `Categoria` de ambos como "Taxi", e o `Tipo_Veiculo` em `Taxi Amarelo` ou `Taxi Verde`.
 
@@ -193,11 +193,11 @@ Fatos criadas:
   - Realizado um left join entre as tabelas silver `inflacao_cpi_u` e `inflacao_cpi_t`, por meio da coluna `observation_date`.
   - Realizada uma interpolação linear para preenchimento do mês de outubro de 2025, sem registro devido ao shutdown do governo americano, a fim de não prejudicar a aálise dos dados e resposta às perguntas de negócio.
  
- #### 2.1 Catálogo de dados
+ ### 3.2 Catálogo de dados
 
  O catálogo de dados da camada gold está descrito abaixo.
 
- ##### **dim_tipo_veiculo**
+ #### **dim_tipo_veiculo**
 
 >Tabela dimensão de informações de tipos de veículos relacionados a serviços de transporte na cidade de Nova Iorque. A tabela possuí informações cadastrais de tipo de >veículo, informando a empresa de aplicativo de viagens associada, ou ao tipo de taxi relacionado. Também possui categorização de veículos entre os tipos "For Hire >Services" e "Taxi", para diferenciar os taxis tradicionais de serviços de viagem por aplicativos, e código de identificação do veículo.
 
@@ -212,7 +212,7 @@ Fatos criadas:
 <img width="1502" height="482" alt="image" src="https://github.com/user-attachments/assets/196804fb-2fb8-4f50-a4e6-8288974d3286" />
 Figura 7 - Linhagem de dados da tabela dim_tipo_veiculo.
 
- ##### **dim_calendario**
+ #### **dim_calendario**
 
 >A tabela contém dados de dimensão de calendário, com período inicial a partir de 2016, e compila informações de ano e número de mês, além de flags que indicam se a >data referente é um feriado observado no estado de Nova Iorque, uma data de fim de semana, e se a data é um dia útil ou não útil, servindo para consumo de análises >temporais na camada gold.
 
@@ -228,7 +228,7 @@ Figura 7 - Linhagem de dados da tabela dim_tipo_veiculo.
 <img width="1488" height="463" alt="image" src="https://github.com/user-attachments/assets/dc4c0bc5-42b2-4814-b22f-0e4cd763541b" />
 Figura 8 - Linhagem de dados da tabela dim_calendario
 
- ##### **dim_zonas_de_taxi**
+#### **dim_zonas_de_taxi**
 
 >A tabela contém informações sobre as zonas de taxi da Taxi and Limousine Comission (TLC) de Nova Iorque. A tabela identifica cada zona de serviço por um código >numérico, agrupado por bairro, zona e zona de serviço.
 
@@ -242,7 +242,7 @@ Figura 8 - Linhagem de dados da tabela dim_calendario
 <img width="1502" height="462" alt="image" src="https://github.com/user-attachments/assets/48182002-3726-4ef0-befd-47233628ae78" />
 Figura 9 - Linhagem de dados da tabela dim_zonas_de_taxi
 
- ##### **fato_demanda_horaria**
+#### **fato_demanda_horaria**
 
 >Tabela fato de registros de viagens por táxis e serviços for hire, ao grão de dia x hora x data de embarque x data destino x hora embarque x hora destino x ID >Veículo. Usada para cálculo de demanda de viagens por local de embarque, desembarque, hora e tipo de serviço de transporte.
 
@@ -261,7 +261,7 @@ Figura 9 - Linhagem de dados da tabela dim_zonas_de_taxi
 <img width="1507" height="658" alt="image" src="https://github.com/user-attachments/assets/8e7a3917-bee9-49cb-baaa-660be7e9c308" />
 Figura 10 - Linhagem dos dados da tabela fato_demanda_horaria
 
- ##### **fato_corrida_mensal**
+#### **fato_corrida_mensal**
 
 > A tabela possuí um resumo de indicadores de viagens realizadas por taxis amarelos, verdes e for hire services agrupada ao grão mensal. São registradas informações de > remuneração do motorista, somatório da tarifa base, e quantidade de viagens, por método de pagamento, tipo de veículo e local de embarque.
 
@@ -279,7 +279,7 @@ Figura 10 - Linhagem dos dados da tabela fato_demanda_horaria
 Figura 11 - Linhagem dos dados da tabela fato_corrida_mensal
 
 
- ##### **fato_corridas_suspeitas**
+#### **fato_corridas_suspeitas**
 
 > A tabela registra as viagens individuais de taxis amarelos e verdes que não cumpriram com alguma das seguintes normativas de operação no município de Nova Iorque:
 >
@@ -303,7 +303,7 @@ Figura 11 - Linhagem dos dados da tabela fato_corrida_mensal
 <img width="1506" height="563" alt="image" src="https://github.com/user-attachments/assets/2fa9437c-e802-487d-94ac-4a9b103cdf55" />
 Figura 12 - Linhagem dos dados da tabela fato_corridas_suspeitas
 
- ##### **fato_inflacao_cpi**
+#### **fato_inflacao_cpi**
 
 >A tabela contém dados do "Consumer Price Index" (CPI) dos Estados Unidos, referente ao indicador de inflação do pais. A tabela registra os índices de inflação urbana >(CPI-U) e do segmento de transportes (CPI-T)
 >Os dados são divulgados mensalmente pelo "Bureau of Labor Statistics" (BLS), e pode ser consultado pelas bases de dados públicas da Reserva Federal Americana.
@@ -320,7 +320,7 @@ Figura 12 - Linhagem dos dados da tabela fato_corridas_suspeitas
 Figura 12 - Linhagem dos dados da tabela fato_inflacao_cpi
 
 ---
-#### 2.2 Screenshot do sistema de catálogo
+### 3.3 Screenshot do sistema de catálogo
 
 Segue abaixo a evidência da criação do sistema de catálogo, juntamente com a linhagem de algumas tabelas da camada bronze. Curiosamente, as tabelas bronze não estão visíveis na linhagem das tabelas gold.
 
@@ -337,7 +337,7 @@ Figura 15 - Linhagem de dados da tabela "greentaxitripdata" da camada bronze.
 Figura 16 - Linhagem de dados da tabela "forhirevehicleshighvolume" da camada silver.
 
 ---
-#### 3. Pipeline de dados
+## 4. Pipeline de dados
 
 O pipeline de dados consiste em um notebook para cada etapa de transformação, iniciando-se na camada `staging` para o download dos arquivos `.parquet` dos datasets da TLC e feriados, seguindo para a camada `bronze` para a ingestão dos dados brutos, `silver` para aplicação de filtros de qualidade de dados e pequenas transformações de dados, e `gold` para a criação das agregações e aplicação de regras de negócio finais.
 

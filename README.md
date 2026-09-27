@@ -205,8 +205,103 @@ Fatos criadas:
 |--------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Tipo_Veiculo | `string` | Nome das empresas de transporte por aplicativo com registros de cadastro nas bases da TLC e classificação de taxis entre amarelos e verdes. <br> --- <br>* Uber<br> * Lyft<br>  * Via<br>  * Juno<br>  * Taxi Amarelo<br>  * Taxi Verde |
 | ID_Veiculo   | `string` | Código de referência para as empresas de transporte por aplicativo utilizado na tabela "forhirevehicleshighvolume", e ID de identificação criado para identificar taxis amarelos e verdes.<br> ---<br> - TA - Taxi Amarelo<br> - TV - Taxi Verde<br> - HV0002 - Juno<br> - HV0003 - Uber<br> - HV0004 - Via<br> - HV0005 - Lyft |
-| Categoria    | `string` | Informa a categoria macro de veículo no cadastro. --- Valores aceitos: * Taxi - Para taxis amarelos e verdes * For Hire Service - Para serviços de transporte por aplicativo.                                                                                                                       |
+| Categoria    | `string` | Informa a categoria macro de veículo no cadastro.<br> --- <br>Valores aceitos:<br> * Taxi - Para taxis amarelos e verdes<br> * For Hire Service - Para serviços de transporte por aplicativo.                                                                                                                       |
 
+  - Linhagem dos dados
+
+<img width="1502" height="482" alt="image" src="https://github.com/user-attachments/assets/196804fb-2fb8-4f50-a4e6-8288974d3286" />
+Figura 7 - Linhagem de dados da tabela dim_tipo_veiculo.
+
+ ##### **dim_calendario**
+
+>A tabela contém dados de dimensão de calendário, com período inicial a partir de 2016, e compila informações de ano e número de mês, além de flags que indicam se a >data referente é um feriado observado no estado de Nova Iorque, uma data de fim de semana, e se a data é um dia útil ou não útil, servindo para consumo de análises >temporais na camada gold.
+
+| Coluna           | Tipo      | Descrição                                                                                                  |
+|------------------|-----------|------------------------------------------------------------------------------------------------------------|
+| Data             | `date`    | Data de referência do calendário, com início a partir de 1/01/2016.                                        |
+| Ano              | `int`     | Valor do ano referente a data.                                                                             |
+| Nr_Mes           | `int`     | Valor numérico do mês referente a data.<br>---<br>Valores aceitos: 1 - 12.                                 |
+| Fl_Fim_de_Semana | `boolean` | Informa se a data é fim de semana (sábado ou domingo).                                                     |
+| Fl_Feriado       | `boolean` | Informa se a data é um feriado observado pelo estado de Nova Iorque (Federal/Estadual).                    |
+| Fl_Dia_Util      | `boolean` | Informa se a data é um dia útil ou não útil, considerando as condições da data de feriado e fim de semana. |
+
+<img width="1488" height="463" alt="image" src="https://github.com/user-attachments/assets/dc4c0bc5-42b2-4814-b22f-0e4cd763541b" />
+Figura 8 - Linhagem de dados da tabela dim_calendario
+
+ ##### **dim_zonas_de_taxi**
+
+>A tabela contém informações sobre as zonas de taxi da Taxi and Limousine Comission (TLC) de Nova Iorque. A tabela identifica cada zona de serviço por um código >numérico, agrupado por bairro, zona e zona de serviço.
+
+| Coluna       | Tipo     | Descrição                                                                                                                                                                                                                                                                                                                                                                                   |
+|--------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| IDLocal      | `int`    | Código numérico representando a zona de taxi da TLC. As zonas são aproximadamente baseadas nas áreas de tabulação de vizinhanças do departamento de planejamento urbano de Nova Iorque (Neighborhood tabulation areas - NTAs), e servem para aproximarem-se dos bairros, para poder se analisar os bairros onde um passageiro foi buscado e enviado.<br>---<br>* Faixa de valores:  1 - 265 |
+| Distrito     | `string` | Descrição do distrito referente à zona de taxi. É composto pelos 5 distritos oficiais, acrescido de "Desconhecido", "Não Disponível - N/A" e o Aeroporto Internacional Newark Liberty.                                                                                                                                                                                                      |
+| Zona         | `string` | Descrição dos bairros e aeroportos referentes à zona de taxi da TLC.                                                                                                                                                                                                                                                                                                                        |
+| Zona_Servico | `string` | Descreve a zona de serviço de taxis e veículos a um nível macro. É composto por áreas de aeroportos, distritais, áreas de pickup/street hail exclusivas para taxis amarelos, e valores não disponíveis (N/A).                                                                                                                                                                               |
+
+<img width="1502" height="462" alt="image" src="https://github.com/user-attachments/assets/48182002-3726-4ef0-befd-47233628ae78" />
+Figura 9 - Linhagem de dados da tabela dim_zonas_de_taxi
+
+ ##### **fato_demanda_horaria**
+
+>Tabela fato de registros de viagens por táxis e serviços for hire, ao grão de dia x hora x data de embarque x data destino x hora embarque x hora destino x ID >Veículo. Usada para cálculo de demanda de viagens por local de embarque, desembarque, hora e tipo de serviço de transporte.
+
+
+| Coluna        | Tipo     | Descrição                                                                                             |
+|---------------|----------|-------------------------------------------------------------------------------------------------------|
+| Data_Embarque | `date`   | dateData de embarque do passageiro.                                                                   |
+| Data_Destino  | `date`   | Data de desembarque do passageiro.                                                                    |
+| Hora_Embarque | `int`    | Número da hora de embarque do passageiro. Formato 24 horas.                                           |
+| Hora_Destino  | `int`    | Número da hora de desembarque do passageiro. Formato 24 horas.                                        |
+| ID_Veiculo    | `string` | Código de identificação do tipo de taxi ou número de licença de serviço de transporte de alto volume. |
+| ID_Embarque   | `double` | Código de área de embarque da TLC.<br>---<br>Valores aceitos: 1 - 265, exceto 264.                    |
+| ID_Destino    | `double` | Código de área de desembarque da TLC.<br>---<br>Valores aceitos: 1 - 265, exceto 264.                 |
+| Qtd_Viagens   | `bigint` | Quantidade total de viagens realizadas na agregação.                                                  |
+
+<img width="1507" height="658" alt="image" src="https://github.com/user-attachments/assets/8e7a3917-bee9-49cb-baaa-660be7e9c308" />
+Figura 10 - Linhagem dos dados da tabela fato_demanda_horaria
+
+ ##### **fato_corrida_mensal**
+
+> A tabela possuí um resumo de indicadores de viagens realizadas por taxis amarelos, verdes e for hire services agrupada ao grão mensal. São registradas informações de > remuneração do motorista, somatório da tarifa base, e quantidade de viagens, por método de pagamento, tipo de veículo e local de embarque.
+
+| Coluna                | Tipo            | Descrição                                                                                                                                                                                                                                                                                                                       |
+|-----------------------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Data                  | `date`          | Mês de referência do registro, no formato dd-mm-aaaa, sendo registrado o último dia do mês para cada linha.                                                                                                                                                                                                                     |
+| ID_Veiculo            | `string`        | Código de identificação do tipo de taxi ou número de licença de serviço de transporte de alto volume.                                                                                                                                                                                                                           |
+| ID_Embarque           | `double`        | Código de área de embarque da TLC.<br>---<br>Valores aceitos: 1 - 265, exceto 264.                                                                                                                                                                                                                                              |
+| Metodo_Pagamento      | `string`        | Descrição do método de pagamento escolhido pelo passageiro.<br><br>* Viagem "Flex Fare" <br>* Cartão de crédito <br>* Dinheiro<br>* Sem cobrança <br>* Disputado<br>* Desconhecido<br>* Viagem anulada<br>---<br>Esse campo é apenas preenchido para taxis amarelos e verdes (ID_Veiculo = TA ou TV).                           |
+| Qtd_Viagens           | `bigint`        | Quantidade total de viagens realizadas no período.                                                                                                                                                                                                                                                                              |
+| Tarifa_Base           | `decimal(12,2)` | Valor total da tarifa base do período cobrada ao passageiro, apurada via soma de "fare_amount" das bases de taxis amarelos e verdes, ou "base_passenger_fare". Não considera gorjetas, impostos e taxas adicionais.<br>Esse campo é apenas preenchido para taxis amarelos e verdes, e for hire services após fevereiro de 2019. |
+| Remuneracao_Motorista | `decimal(12,2)` | Remuneração total do motorista. O campo é apenas preenchido para veículos do tipo "For Hire Service" (ID_Veiculo entre HV0002 e HV0005)<br>O campo é calculado a partir da soma de "driver_pay" e "tips" da tabela "forhirevehicleshighvolume"                                                                                  |
+
+<img width="1502" height="723" alt="image" src="https://github.com/user-attachments/assets/19793595-d779-435a-afea-2292fed7feb1" />
+Figura 11 - Linhagem dos dados da tabela fato_corrida_mensal
+
+
+ ##### **fato_corridas_suspeitas**
+
+> A tabela registra as viagens individuais de taxis amarelos e verdes que não cumpriram com alguma das seguintes normativas de operação no município de Nova Iorque:
+>
+>Táxis amarelos e verdes não podem realizar o embarque de passageiros fora das dependências da cidade;
+>Táxis verdes não podem realizar o embarque em aeroportos sem taxa negociada previamente, nem realizar embarques em zonas de serviço exclusivas para táxis amarelos.
+
+| Coluna                | Tipo     | Descrição                                                                                                                                                                                                                    |
+|-----------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Provedor              | `string` | Nome do provedor de serviço de taxi.<br>---<br>Valores aceitos:<br>- Creative Mobile Technologies, LLC <br>- Curb Mobility, LLC <br>- Myle Technologies Inc<br>- Helix                                                       |
+| Data_Embarque         | `date`   | Data do embarque do passageiro.                                                                                                                                                                                              |
+| Data_Destino          | `date`   | Data de desembarque do passageiro.                                                                                                                                                                                           |
+| Hora_Embarque         | `int`    | Número da hora de embarque do passageiro. Formato 24 horas.                                                                                                                                                                  |
+| Hora_Destino          | `int`    | Número da hora de desembarque do passageiro. Formato 24 horas.                                                                                                                                                               |
+| ID_Veiculo            | `string` | Código de identificação do tipo de taxi ou número de licença de serviço de transporte de alto volume.                                                                                                                        |
+| ID_Embarque           | `bigint` | Zona de taxi da TLC onde o taxímetro foi acionado, representando o local de início da viagem.<br>---<br>Valor válido: 265                                                                                                    |
+| ID_Destino            | `bigint` | Zona de taxi da TLC onde o taxímetro foi parado, representando o local de fim da viagem.<br>---<br>Intervalo válido: De 1 a 265, exceto 264                                                                                  |
+| Metodo_Pagamento      | `string` | Descrição do método de pagamento escolhido pelo passageiro.<br><br>* Viagem "Flex Fare" <br>* Cartão de crédito <br>* Dinheiro<br>* Sem cobrança <br>* Disputado<br>* Desconhecido<br>* Viagem anulada                       |
+| Tipo_Tarifa           | `string` | Tarifa efetiva ao final da viagem.<br>---<br>- Taxa padrão (Standard fare)<br>- JFK <br>- Newark <br>- Nassau ou Westchester <br>- Taxa negociada (Negotiated fare)<br>- Viagem em grupo (Group ride)<br>- Nulo/Desconhecido |
+| Motivo_Irregularidade | `string` | Descrição do motivo de irregularidade da viagem.<br>---<br>- Embarque Fora de Nova Iorque<br>- Embarque em Aeroporto não negociado<br>- Embarque em zona de taxis amarelos                                                   |
+
+<img width="1506" height="563" alt="image" src="https://github.com/user-attachments/assets/2fa9437c-e802-487d-94ac-4a9b103cdf55" />
+Figura 12 - Linhagem dos dados da tabela fato_corridas_suspeitas
 
 
 ---

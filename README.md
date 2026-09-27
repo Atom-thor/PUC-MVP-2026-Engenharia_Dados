@@ -55,6 +55,7 @@ Os dados são disponibilizados como conjuntos de dados públicos (*public data s
 - **Isenção de responsabilidade**: a cidade não se responsabiliza por deficiências nos dados ou em aplicações de terceiros que os utilizem.
 
 <img width="1225" height="180" alt="image" src="https://github.com/user-attachments/assets/ea841483-9e8a-41b0-bff0-42674c5963ec" />
+Figura 1 - Descrição dos termos de uso dos dados públicos da cidade de Nova Iorque.
 
 #### Dados de índices de inflação da BLS, consumidos via FRED
 
@@ -100,13 +101,13 @@ A biblioteca `holidays` (Vacanza Team e colaboradores, incluindo dr-prodigy e ry
 
 ### 2. Carga dos dados
 
-Primeiramente foi criado um notebook `01. Preparação` para criação do catálogo `MVP`, e schemas para cada etapa do pipeline:
+O notebook [`01. Preparação`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/01.%20Prepara%C3%A7%C3%A3o.ipynb) realizou a criação do catálogo `MVP`, e schemas para cada etapa do pipeline:
 - Landing: Para o download dos dados brutos em volumes dedicados, explicitado a seguir;
 - Bronze: Para a materialização das tabelas contendo os dados brutos;
 - Silver: Para a materialização das tabelas com filtros de qualidade aplicados;
 - Gold: Para as tabelas dimensão e fato finais.
 
-O notebook em seguida cria volumes dedicados para cada tipo de dataset consumido, na camada `landing`:
+O notebook em seguida criou volumes dedicados para cada tipo de dataset consumido, na camada `staging`:
 - yellow_taxi: Para download de arquivos `.parquet` da base de dados Yellow Taxi Trip Data;
 - green_taxi: Para download de arquivos `.parquet` da base de dados Green Taxi Trip Data;
 - fhv: Para download de arquivos `.parquet` da base de dados For Hire Vehicles Taxi Trip Data;
@@ -114,14 +115,128 @@ O notebook em seguida cria volumes dedicados para cada tipo de dataset consumido
 - taxi_zones: Para o download do arquivo `.csv` de consulta de distritos, bairros e zonas de serviço por ID de zona de táxi.
 - misc: Para o download de arquivos de outras naturezas não especificadas nos demais volumes.
 
+Em sequência, o notebook [`02. Staging`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/02.%20Staging.ipynb) realizou o download sequencial dos arquivos `.parquet` das bases de táxi amarelo, verde, FHV (For-Hire Vehicle) e HVFHS (High Volume For-Hire Services) em seus respectivos volumes dedicados, utilizando funções específicas. Os dados foram baixados a partir de 2016 para táxi amarelo, verde e FHV, e a partir de fevereiro/2019 para o HVFHS, quando as viagens de aplicativos de alto volume passaram a ser registradas em base própria.
 
+O notebook também foi utilizado para consumir os dados de feriados da biblioteca `holidays` do python, e salvou-a no volume `misc`.
 
-### 1.2 Fontes dos Dados e Licenças de uso
+Os dados de inflação e tabelas auxiliares de zonas de táxi e empresas afiliadas às bases FHV e HVFHS foram carregadas por meio de upload manual a partir de suas respectivas fontes ([CPIAUCSL](https://fred.stlouisfed.org/series/CPIAUCSL), [CPITRNSL](https://fred.stlouisfed.org/series/CPITRNSL), [zonas de táxi](https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv), [bases e empresas filiadas](https://www.nyc.gov/assets/tlc/downloads/pdf/trip_record_user_guide.pdf)). A tabela de empresas afiliadas aos serviços for-hire `fhv_lookup.csv` foi construída manualmente em uma planilha Excel e posteriormente convertida em `.csv`, com base no [manual de uso do dataset](https://www.nyc.gov/assets/tlc/downloads/pdf/trip_record_user_guide.pdf) da TLC.
 
-A fonte primária dos dados foi o repositório de dados abertos da TLC. A carga dos dados foi realizada por meio de um script que faz o download sequencial, por mês, dos arquivos `.parquet` disponibilizados no website da própria TLC. O script está referenciado no notebook `CITAR NOTEBOOK AQUI`.
+A ingestão dos dados na camada bronze é abordada nos tópicos seguintes.
 
-Os dados foram baixados a partir de 2016 e armazenados na camada landing, dedicada a cada tipo de base. A base de dados `High Volume For-Hire Vehicle (HVFHS)` teve seus registros iniciados apenas em fevereiro de 2019, e portanto sua coleta para o MVP também se iniciou nesse período.
+---
+#### 2.1 Evidências
 
+<img width="1287" height="697" alt="Captura de tela 2026-09-27 161223" src="https://github.com/user-attachments/assets/129debe1-20b3-4cba-8cab-8f659e3a593b" />
+Figura 2 - Log dos últimos downloads dos datasets da TLC, realizados pela função.  
+<br><br>
+
+<img width="1492" height="892" alt="image" src="https://github.com/user-attachments/assets/bb4d5776-e485-4dd0-b92f-294a32f04e21" />
+Figura 3 - Evidência da persistência dos dados brutos da base da TLC nos volumes.  <br><br>
+<br><br>
+
+<img width="1270" height="343" alt="Captura de tela 2026-09-27 161234" src="https://github.com/user-attachments/assets/3b9494f9-cd7f-4d76-9e37-7ef919c84491" />
+Figura 4 - Função usada para consumo de dados de feriados.
+
+<br><br>
+<img width="549" height="284" alt="image" src="https://github.com/user-attachments/assets/212f539a-9e79-4d27-b832-52f40877bc79" />
+<img width="549" height="218" alt="image" src="https://github.com/user-attachments/assets/d6d1c63f-edb7-41f1-b4e9-52eb86a869d5" />
+
+Figuras 5 e 6 - Bases de dados enviadas manualmente ao volume `misc` e `taxi_zones`
+
+### 2. Modelagem e Catálogo de Dados
+
+Modelo de dados: Esquema estrela com 4 tabelas fato e 3 dimensões.
+
+<img width="632" height="795" alt="image" src="https://github.com/user-attachments/assets/4ef655ce-3c95-44ba-adad-1805f6338004" />
+
+Dimensões criadas: 
+
+- **dim_calendario**: Usada para agregações e filtros de ano e mês, feriados e dias úteis/não úteis.
+- **dim_tipo_veiculo**: Usada para agregar os códigos de base FHS e HVFHV em suas respectivas empresas de viagem por aplicativo afiliadas (Uber, Lyft, Via), tipos de táxi (amarelo, verde), e por tipo de veículo (taxi, For Hire Service).
+- **dim_zonas_de_taxi**: Usado para segmentar e agregar os códigos de localização de embarque e desembarque nos respectivos distritos, bairros, e zonas de serviço de referência.
+
+Fatos criadas:
+
+- **fato_corrida_mensal**: Tabela criada para responder às perguntas 1, 2, 3, 5, 7. Realiza uma agregação de informações de viagens na granularidade mês x Local Embarque x Veículo x Método Pagamento.
+  
+- **fato_demanda_horaria**: Tabela criada para responder às perguntas 5 e 6. Agrega informações de viagem ao grão dia x hora embarque x hora desembarque x local embarque x local desembarque x veículo.
+
+- **fato_corridas_suspeitas**: Tabela criada para responder a pergunta 4. Retorna as informações individuais de viagens que não cumprem a legislação municipal de operação de taxis amarelos e verdes.
+
+#### 2.1 Escolhas de modelagem realizadas
+
+- **dim_tipo_veiculo**: Para permitir que a dimensão possa ser usada para todos os tipos de veículos do dataset, independentemente de serem do tipo `taxi` ou `for hire services`, foi criada uma chave substituta para os táxis amarelos (`ID_Veiculo = "TA"`), e táxis verdes (`ID_Veiculo = TV`), definindo a `Categoria` de ambos como "Taxi", e o `Tipo_Veiculo` em `Taxi Amarelo` ou `Taxi Verde`.
+
+- **dim_calendario**: Foi utilizado como flag de feriado apenas os feriados de fato observados no estado de Nova Iorque. Alguns feriados foram disponibilizados na biblioteca `holidays` como contendo tanto a data oficial, quanto o dia de fato observado, quando o primeiro não estava adequado às regras de observância de feriados americanos. Essa regra específica foi tratada na camada `silver`.
+
+- **fato_corrida_mensal**:
+  - Para poder-se ter o histórico de viagens realizadas por serviços de corrida por aplicativo de alto volume anteriores a 2019, foi utilizada a base `For Hire Services`, filtrando os números de base de despache coincidentes com os presentes na tabela `fhv_base_lookup`. Dados de distância, tarifas e remuneração ao motorista não estão presentes para essa categoria entre os períodos de 2016 a jan/2019;
+  - Os indicadores de tarifa base, remuneração do motorista e quantidade de corridas estão agregadas como soma ao grão mensal, a fins de possibilitar o cálculo de médias e indicadores independentemente a agregação utilizada nas análises finais.
+  - Para taxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
+  - Para veiculos do tipo For Hire Services nos períodos anteriores a fev/2019, foi feita a substituição do número de base de despache pelo código de operadora credenciada do serviço high volume for hire usada após fev/2019, a fins de simplificar a modelagem de dados na `dim_tipo_veiculo`, mantendo-a enxuta, com um `ID_Veiculo` por tipo de operadora/taxi. A base legada For Hire Services possuia mais de 10 códigos de base de despache distintos relacionados a um único operador credencialdo (ex: Uber).
+ 
+ - **fato_demanda_horaria**:
+  - Para poder-se ter o histórico de viagens realizadas por serviços de corrida por aplicativo de alto volume anteriores a 2019, foi utilizada a base `For Hire Services`, filtrando os números de base de despache coincidentes com os presentes na tabela `fhv_base_lookup`. Dados de data, hora e local de desembarque não estão disponíveis para períodos anteriores a meados de 2017, quando a TLC passou a oficialmente exigir o registro para For Hire Services;
+  - Para taxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
+  - Para veiculos do tipo For Hire Services nos períodos anteriores a fev/2019, foi feita a substituição do número de base de despache pelo código de operadora credenciada do serviço high volume for hire usada após fev/2019, a fins de simplificar a modelagem de dados na `dim_tipo_veiculo`, mantendo-a enxuta, com um `ID_Veiculo` por tipo de operadora/taxi. A base legada For Hire Services possuia mais de 10 códigos de base de despache distintos relacionados a um único operador credencialdo (ex: Uber).
+  - As colunas de embarque e desembarque são ingeridas originalmente no formato datetime na bronze. Para a gold, é realizada a separação de datas como tipo date, e horários são truncados ao número inteiro da hora.
+  - A tabela possui seus registros agregados ao grão de dia e hora.
+
+ - **fato_corridas_suspeitas**:
+  - Apenas são registradas viagens realizadas por táxis amarelos e verdes, que possuem restrições a locais de operação de serviço não aplicáveis a categoria for hire services;
+  - Para taxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
+  - Não foi realizada nenhuma agregação de grão para essa tabela.
+  - Apenas são carregados registros que não cumprem alguma das normas de operação dos taxis: Não é permitido realizar o embarque de passageiros fora da cidade de Nova Iorque, taxis verdes não podem realizar o embarque em aeroportos a menos que a tarifa seja combinada previamente, nem podem realizar o embarque de passageiros na zona de serviço exclusiva para táxis amarelos.
+
+---
+### 2. Modelagem e Catálogo de Dados
+
+Modelo de dados: Esquema estrela com 4 tabelas fato e 3 dimensões.
+
+<img width="632" height="795" alt="image" src="https://github.com/user-attachments/assets/4ef655ce-3c95-44ba-adad-1805f6338004" />
+
+Dimensões criadas: 
+
+- **dim_calendario**: Usada para agregações e filtros de ano e mês, feriados e dias úteis/não úteis.
+- **dim_tipo_veiculo**: Usada para agregar os códigos de base FHS e HVFHV em suas respectivas empresas de viagem por aplicativo afiliadas (Uber, Lyft, Via), tipos de táxi (amarelo, verde), e por tipo de veículo (táxi, For-Hire Service).
+- **dim_zonas_de_taxi**: Usada para segmentar e agregar os códigos de localização de embarque e desembarque nos respectivos distritos, bairros, e zonas de serviço de referência.
+
+Fatos criadas:
+
+- **fato_corrida_mensal**: Tabela criada para responder às perguntas 1, 2, 3, 5, 7. Realiza uma agregação de informações de viagens na granularidade mês x Local Embarque x Veículo x Método Pagamento.
+  
+- **fato_demanda_horaria**: Tabela criada para responder às perguntas 5 e 6. Agrega informações de viagem ao grão dia x hora embarque x hora desembarque x local embarque x local desembarque x veículo.
+
+- **fato_corridas_suspeitas**: Tabela criada para responder à pergunta 4. Retorna as informações individuais de viagens que não cumprem a legislação municipal de operação de táxis amarelos e verdes.
+
+#### 2.1 Escolhas de modelagem realizadas
+
+- **dim_tipo_veiculo**: Para permitir que a dimensão possa ser usada para todos os tipos de veículos do dataset, independentemente de serem do tipo `taxi` ou `for hire services`, foi criada uma chave substituta para os táxis amarelos (`ID_Veiculo = "TA"`) e táxis verdes (`ID_Veiculo = "TV"`), definindo a `Categoria` de ambos como "Taxi", e o `Tipo_Veiculo` em `Taxi Amarelo` ou `Taxi Verde`.
+
+- **dim_calendario**: Foi utilizado como flag de feriado apenas os feriados de fato observados no estado de Nova Iorque. Alguns feriados foram disponibilizados na biblioteca `holidays` como contendo tanto a data oficial quanto o dia de fato observado, quando o primeiro não estava adequado às regras de observância de feriados americanos. Essa regra específica foi tratada na camada `silver`.
+
+- **fato_corrida_mensal**:
+  - Para poder-se ter o histórico de viagens realizadas por serviços de corrida por aplicativo de alto volume anteriores a 2019, foi utilizada a base `For Hire Services`, filtrando os números de base de despacho coincidentes com os presentes na tabela `fhv_base_lookup`. Dados de distância, tarifas e remuneração ao motorista não estão presentes para essa categoria entre os períodos de 2016 a jan/2019;
+  - Os indicadores de tarifa base, remuneração do motorista e quantidade de corridas estão agregados como soma ao grão mensal, a fim de possibilitar o cálculo de médias e indicadores independentemente da agregação utilizada nas análises finais.
+  - Para táxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
+  - Para veículos do tipo For Hire Services nos períodos anteriores a fev/2019, foi feita a substituição do número de base de despacho pelo código de operadora credenciada do serviço high volume for hire usado após fev/2019, a fim de simplificar a modelagem de dados na `dim_tipo_veiculo`, mantendo-a enxuta, com um `ID_Veiculo` por tipo de operadora/táxi. A base legada For Hire Services possuía mais de 10 códigos de base de despacho distintos relacionados a um único operador credenciado (ex: Uber).
+ 
+ - **fato_demanda_horaria**:
+  - Para poder-se ter o histórico de viagens realizadas por serviços de corrida por aplicativo de alto volume anteriores a 2019, foi utilizada a base `For Hire Services`, filtrando os números de base de despacho coincidentes com os presentes na tabela `fhv_base_lookup`. Dados de data, hora e local de desembarque não estão disponíveis para períodos anteriores a meados de 2017, quando a TLC passou a exigir oficialmente o registro para For Hire Services;
+  - Para táxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
+  - Para veículos do tipo For Hire Services nos períodos anteriores a fev/2019, foi feita a substituição do número de base de despacho pelo código de operadora credenciada do serviço high volume for hire usado após fev/2019, a fim de simplificar a modelagem de dados na `dim_tipo_veiculo`, mantendo-a enxuta, com um `ID_Veiculo` por tipo de operadora/táxi. A base legada For Hire Services possuía mais de 10 códigos de base de despacho distintos relacionados a um único operador credenciado (ex: Uber).
+  - As colunas de embarque e desembarque são ingeridas originalmente no formato datetime na bronze. Para a gold, é realizada a separação de datas como tipo date, e horários são truncados ao número inteiro da hora.
+  - A tabela possui seus registros agregados ao grão de dia e hora.
+
+ - **fato_corridas_suspeitas**:
+  - Apenas são registradas viagens realizadas por táxis amarelos e verdes, que possuem restrições a locais de operação de serviço não aplicáveis à categoria for hire services;
+  - Para táxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
+  - Não foi realizada nenhuma agregação de grão para essa tabela.
+  - Apenas são carregados registros que não cumprem alguma das normas de operação dos táxis: não é permitido realizar o embarque de passageiros fora da cidade de Nova Iorque; táxis verdes não podem realizar o embarque em aeroportos a menos que a tarifa seja combinada previamente, nem podem realizar o embarque de passageiros na zona de serviço exclusiva para táxis amarelos.
+
+- **fato_**
+
+---
 
 Referências
 ===

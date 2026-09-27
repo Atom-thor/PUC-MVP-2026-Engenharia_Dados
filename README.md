@@ -74,7 +74,7 @@ A biblioteca `holidays` (Vacanza Team e colaboradores, incluindo dr-prodigy e ry
 
 ### 1.4 Estrutura dos dados
 
-#### Dados da TLC
+#### Dados de registros de viagens da TLC
 
 | Tabela                        | Estrutura  | Observação |
 |-------------------------------|------------|------------|
@@ -84,6 +84,29 @@ A biblioteca `holidays` (Vacanza Team e colaboradores, incluindo dr-prodigy e ry
 | High Volume For Hire Services | originating_base_num, dispatching_base_num, request_datetime, on_scene_datetime, pickup_datetime, dropoff_datetime, DOLocationID, PULocationID, access_a_ride_flag, airport_fee, base_passenger_fare, bcf, cbd_congestion_fee, congestion_surcharge, driver_pay, hvfhs_license_num, sales_tax, shared_match_flag, shared_request_flag, tips, tolls, trip_miles, trip_time, wav_match_flag, wav_request_flag | Estrutura obtida via [dicionário de dados do provedor](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_hvfhs.pdf) |
 | fhv_base_lookup | High_Volume_License_Number, License_Number, App_Company_Affiliation| Estrutura copiada do [manual de uso do dataset](https://www.nyc.gov/assets/tlc/downloads/pdf/trip_record_user_guide.pdf) |
 | taxi_zone_lookup | LocationID, Borough, Zone, service_zone | Estrutura consultada diretamente da [fonte em .csv](https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv) |
+
+#### Dados de índices de inflação da BLS, consumidos via FRED
+
+| Tabela  | Estrutura  |
+|---------|------------|
+| CPIAUCSL | observation_date, CPIAUCSL |
+| CPITRNSL | observation_date, CPITRNSL |
+
+#### Dados de feriados da biblioteca holidays
+
+| Tabela  | Estrutura  |
+|---------|------------|
+| feriados_us_ny (nome dado durante a ingestão na bronze) | date, holiday_name |
+
+### 2. Carga dos dados
+
+Primeiramente foi criado um notebook `01. Preparação` para criação do catálogo `MVP`, e schemas para cada etapa do pipeline:
+- Landing: Para o download dos dados brutos em volumes dedicados, explicitado a seguir;
+- Bronze: Para a materialização das tabelas contendo os dados brutos;
+- Silver: Para a materialização das tabelas com filtros de qualidade aplicados;
+- Gold: Para as tabelas dimensão e fato finais.
+
+Em sequência foi realizada a criação de volumes dedicados para cada tipo de dataset na camada `landing` por meio do notebook 
 
 ### 1.2 Fontes dos Dados e Licenças de uso
 

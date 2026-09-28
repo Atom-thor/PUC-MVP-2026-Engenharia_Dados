@@ -18,21 +18,21 @@ Por fim, temos ainda questões de custo ao consumidor e remuneração do motoris
 ### 1.1 Perguntas de negócio
 ---
 >
->1 - Como tem evoluído a participação do marketshare dos serviços de taxi legado frente aos serviços de corrida por aplicativo (For Hire Services)? Qual é o >marketshare dos taxis no ano atual, 2026, e qual ano foi o ponto de inflexão quando as corridas do tipo "For Hire Services" passaram a dominar?
+>1 - Como tem evoluído a participação do marketshare dos serviços de taxi legado frente aos serviços de corrida por aplicativo (For Hire Services)? Qual é o marketshare dos taxis no ano atual, 2026, e qual ano foi o ponto de inflexão quando as corridas do tipo "For Hire Services" passaram a dominar?
 >
 >2 - Qual a taxa de corridas disputadas e nulas para Taxis Verdes e Amarelos nos últimos 2 anos? Esse percentual tem aumentado ou diminuido?
 >
 >3 - Qual o método de pagamento predominante para os taxis verdes e amarelos nos últimos anos? Como essa distribuição mudou na última década?
 >
->4 - Existem registros de corridas suspeitas realizadas por Taxis Amarelos e Verdes? Por corrida suspeita, entende-se como aquelas que não estão de acordo com a >legislação de Taxis da cidade: Táxis amarelos e verdes não podem buscar passageiros fora da cidade de Nova Iorque, e Taxis Verdes não podem: Buscar passageiros de >Aeroportos exceto quando a corrida tem tarifa pré combinada, buscar passageiros em zonas exclusivas de taxis amarelos.
+>4 - Existem registros de corridas suspeitas realizadas por Taxis Amarelos e Verdes? Por corrida suspeita, entende-se como aquelas que não estão de acordo com a legislação de Taxis da cidade: Táxis amarelos e verdes não podem buscar passageiros fora da cidade de Nova Iorque, e Taxis Verdes não podem: Buscar passageiros de Aeroportos exceto quando a corrida tem tarifa pré combinada, buscar passageiros em zonas exclusivas de taxis amarelos.
 >
->5 - Quais serviços de corrida por aplicativo ou taxi dominam em cada distrito? Quais são os 5 principais bairros de pico para embarque e desembarque durante o ano, >considerando dias úteis e não úteis de 2025 e 2026?
+>5 - Quais serviços de corrida por aplicativo ou taxi dominam em cada distrito? Quais são os 5 principais bairros de pico para embarque e desembarque durante o ano, considerando dias úteis e não úteis de 2025 e 2026?
 >
 >6 - Quais são os horários de pico, para embarque e desembarque, por distrito, em dias úteis e não úteis?
 >
 >7 - Como a remuneração total do motorista de serviços de corrida por aplicativo tem acompanhado a inflação geral desde 2019?
 >
->8 - Como as tarifas base ao passageiro (sem incluir impostos, gorjetas e taxas) tem acompanhado a inflação geral americana, e a inflação especifica do segmento de >transportes? As regulamentações do setor taxista fazem com que ela tenha sofrido menos ou mais reajustes na inflação com relação a corridas por aplicativo?
+>8 - Como as tarifas base ao passageiro (sem incluir impostos, gorjetas e taxas) tem acompanhado a inflação geral americana, e a inflação especifica do segmento de transportes? As regulamentações do setor taxista fazem com que ela tenha sofrido menos ou mais reajustes na inflação com relação a corridas por aplicativo?
 
 ### 1.2 Dados Brutos
 
@@ -42,7 +42,7 @@ Para responder as perguntas de negócio, foram necessários conjuntos de dados b
 
 * Os índices históricos do [Consumer Price Index for Urban Consumers (CPI-U)](https://fred.stlouisfed.org/series/CPIAUCSL) para o índice geral de inflação, e o [Consumer Price Index Urban Consumers: Transportation in U.S. City Average (CPI-T)](https://fred.stlouisfed.org/series/CPITRNSL), disponibilizados no site do Federal Reserve Bank of St. Louis (FRED), sendo a fonte primária do dado o U.S. Bureau of Labor Statistics (BLS).
 
-* Registros de feriados federais e estaduais observados no estado de Nova Iorque, para as análises de dias úteis vs. não úteis. Os dados foram consumidos pela bilioteca `holidays` do python.
+* Registros de feriados federais e estaduais observados no estado de Nova Iorque, para as análises de dias úteis vs. não úteis. Os dados foram consumidos pela biblioteca `holidays` do python.
 
 ### 1.3 Licenças de uso
 
@@ -176,14 +176,14 @@ Fatos criadas:
   - Para táxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
   - Para veículos do tipo For Hire Services nos períodos anteriores a fev/2019, foi feita a substituição do número de base de despacho pelo código de operadora credenciada do serviço high volume for hire usado após fev/2019, a fim de simplificar a modelagem de dados na `dim_tipo_veiculo`, mantendo-a enxuta, com um `ID_Veiculo` por tipo de operadora/táxi. A base legada For Hire Services possuía mais de 10 códigos de base de despacho distintos relacionados a um único operador credenciado (ex: Uber).
  
- - **fato_demanda_horaria**:
+- **fato_demanda_horaria**:
   - Para poder-se ter o histórico de viagens realizadas por serviços de corrida por aplicativo de alto volume anteriores a 2019, foi utilizada a base `For Hire Services`, filtrando os números de base de despacho coincidentes com os presentes na tabela `fhv_base_lookup`. Dados de data, hora e local de desembarque não estão disponíveis para períodos anteriores a meados de 2017, quando a TLC passou a exigir oficialmente o registro para For Hire Services;
   - Para táxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
   - Para veículos do tipo For Hire Services nos períodos anteriores a fev/2019, foi feita a substituição do número de base de despacho pelo código de operadora credenciada do serviço high volume for hire usado após fev/2019, a fim de simplificar a modelagem de dados na `dim_tipo_veiculo`, mantendo-a enxuta, com um `ID_Veiculo` por tipo de operadora/táxi. A base legada For Hire Services possuía mais de 10 códigos de base de despacho distintos relacionados a um único operador credenciado (ex: Uber).
   - As colunas de embarque e desembarque são ingeridas originalmente no formato datetime na bronze. Para a gold, é realizada a separação de datas como tipo date, e horários são truncados ao número inteiro da hora.
   - A tabela possui seus registros agregados ao grão de dia e hora.
 
- - **fato_corridas_suspeitas**:
+- **fato_corridas_suspeitas**:
   - Apenas são registradas viagens realizadas por táxis amarelos e verdes, que possuem restrições a locais de operação de serviço não aplicáveis à categoria for hire services;
   - Para táxis amarelos e verdes, foi usada a chave substituta `TA` e `TV`, respectivamente, no campo `ID_Veiculo` para viabilizar o relacionamento com a `dim_tipo_veiculo`.
   - Não foi realizada nenhuma agregação de grão para essa tabela.
@@ -199,7 +199,7 @@ Fatos criadas:
 
  #### **dim_tipo_veiculo**
 
->Tabela dimensão de informações de tipos de veículos relacionados a serviços de transporte na cidade de Nova Iorque. A tabela possuí informações cadastrais de tipo de >veículo, informando a empresa de aplicativo de viagens associada, ou ao tipo de taxi relacionado. Também possui categorização de veículos entre os tipos "For Hire >Services" e "Taxi", para diferenciar os taxis tradicionais de serviços de viagem por aplicativos, e código de identificação do veículo.
+>Tabela dimensão de informações de tipos de veículos relacionados a serviços de transporte na cidade de Nova Iorque. A tabela possuí informações cadastrais de tipo de veículo, informando a empresa de aplicativo de viagens associada, ou ao tipo de taxi relacionado. Também possui categorização de veículos entre os tipos "For Hire Services" e "Taxi", para diferenciar os taxis tradicionais de serviços de viagem por aplicativos, e código de identificação do veículo.
 
 | Coluna       | Tipo     | Descrição                                                                                                                                                                                                                                                                                           |
 |--------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -214,7 +214,7 @@ Figura 7 - Linhagem de dados da tabela dim_tipo_veiculo.
 
  #### **dim_calendario**
 
->A tabela contém dados de dimensão de calendário, com período inicial a partir de 2016, e compila informações de ano e número de mês, além de flags que indicam se a >data referente é um feriado observado no estado de Nova Iorque, uma data de fim de semana, e se a data é um dia útil ou não útil, servindo para consumo de análises >temporais na camada gold.
+>A tabela contém dados de dimensão de calendário, com período inicial a partir de 2016, e compila informações de ano e número de mês, além de flags que indicam se a data referente é um feriado observado no estado de Nova Iorque, uma data de fim de semana, e se a data é um dia útil ou não útil, servindo para consumo de análises temporais na camada gold.
 
 | Coluna           | Tipo      | Descrição                                                                                                  |
 |------------------|-----------|------------------------------------------------------------------------------------------------------------|
@@ -232,7 +232,7 @@ Figura 8 - Linhagem de dados da tabela dim_calendario
 
 #### **dim_zonas_de_taxi**
 
->A tabela contém informações sobre as zonas de taxi da Taxi and Limousine Comission (TLC) de Nova Iorque. A tabela identifica cada zona de serviço por um código >numérico, agrupado por bairro, zona e zona de serviço.
+>A tabela contém informações sobre as zonas de taxi da Taxi and Limousine Comission (TLC) de Nova Iorque. A tabela identifica cada zona de serviço por um código numérico, agrupado por bairro, zona e zona de serviço.
 
 | Coluna       | Tipo     | Descrição                                                                                                                                                                                                                                                                                                                                                                                   |
 |--------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -247,7 +247,7 @@ Figura 9 - Linhagem de dados da tabela dim_zonas_de_taxi
 
 #### **fato_demanda_horaria**
 
->Tabela fato de registros de viagens por táxis e serviços for hire, ao grão de dia x hora x data de embarque x data destino x hora embarque x hora destino x ID >Veículo. Usada para cálculo de demanda de viagens por local de embarque, desembarque, hora e tipo de serviço de transporte.
+>Tabela fato de registros de viagens por táxis e serviços for hire, ao grão de dia x hora x data de embarque x data destino x hora embarque x hora destino x ID Veículo. Usada para cálculo de demanda de viagens por local de embarque, desembarque, hora e tipo de serviço de transporte.
 
 
 | Coluna        | Tipo     | Descrição                                                                                             |
@@ -268,7 +268,7 @@ Figura 10 - Linhagem dos dados da tabela fato_demanda_horaria
 
 #### **fato_corrida_mensal**
 
-> A tabela possuí um resumo de indicadores de viagens realizadas por taxis amarelos, verdes e for hire services agrupada ao grão mensal. São registradas informações de > remuneração do motorista, somatório da tarifa base, e quantidade de viagens, por método de pagamento, tipo de veículo e local de embarque.
+> A tabela possuí um resumo de indicadores de viagens realizadas por taxis amarelos, verdes e for hire services agrupada ao grão mensal. São registradas informações de  remuneração do motorista, somatório da tarifa base, e quantidade de viagens, por método de pagamento, tipo de veículo e local de embarque.
 
 | Coluna                | Tipo            | Descrição                                                                                                                                                                                                                                                                                                                       |
 |-----------------------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -291,7 +291,7 @@ Figura 11 - Linhagem dos dados da tabela fato_corrida_mensal
 > A tabela registra as viagens individuais de taxis amarelos e verdes que não cumpriram com alguma das seguintes normativas de operação no município de Nova Iorque:
 >
 >Táxis amarelos e verdes não podem realizar o embarque de passageiros fora das dependências da cidade;
->Táxis verdes não podem realizar o embarque em aeroportos sem taxa negociada previamente, nem realizar embarques em zonas de serviço exclusivas para táxis amarelos.
+Táxis verdes não podem realizar o embarque em aeroportos sem taxa negociada previamente, nem realizar embarques em zonas de serviço exclusivas para táxis amarelos.
 
 | Coluna                | Tipo     | Descrição                                                                                                                                                                                                                    |
 |-----------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -314,8 +314,8 @@ Figura 12 - Linhagem dos dados da tabela fato_corridas_suspeitas
 
 #### **fato_inflacao_cpi**
 
->A tabela contém dados do "Consumer Price Index" (CPI) dos Estados Unidos, referente ao indicador de inflação do pais. A tabela registra os índices de inflação urbana >(CPI-U) e do segmento de transportes (CPI-T)
->Os dados são divulgados mensalmente pelo "Bureau of Labor Statistics" (BLS), e pode ser consultado pelas bases de dados públicas da Reserva Federal Americana.
+>A tabela contém dados do "Consumer Price Index" (CPI) dos Estados Unidos, referente ao indicador de inflação do pais. A tabela registra os índices de inflação urbana (CPI-U) e do segmento de transportes (CPI-T)
+Os dados são divulgados mensalmente pelo "Bureau of Labor Statistics" (BLS), e pode ser consultado pelas bases de dados públicas da Reserva Federal Americana.
 >
 >Unidades: Índice 1982-1984=100, ajustado sazonalmente
 
@@ -405,14 +405,14 @@ Os principais problemas e resoluções abordados nos notebooks foram resumidos n
 ### Problemas de conteúdo (bronze → silver)
 
 | Problema | Base | Tratamento na silver |
-|---|---|---|---|
-| Desembarque anterior ao embarque | Amarelo, Verde, FHV, HVFHS | Registros removidos. Em FHV o filtro é aplicado apenas a partir de 2018, pois até meados de 2017 o campo não era registrado na base |
+|---|---|---|
+| Desembarque anterior ao embarque | Amarelo, Verde, FHV, HVFHS | Registros removidos. Na FHV, o filtro é aplicado apenas a partir de 2018, pois até meados de 2017 o campo não era registrado na base |
 | Mês/ano de embarque incompatível com o arquivo de origem (inclui datas fora de 2016 a 2026) | Amarelo, Verde, FHV | Registros removidos |
 | Distâncias negativas | Amarelo, Verde | Removidos (`trip_distance >= 0`) |
-| Distância zero | Amarelo, Verde | Removidos pela regra tarifa/distância (remove por resultar em divisão por zero) |
-| Distância | HVFHS | Removidos (`trip_miles > 0`), pois não há como distinguir cancelamento de erro de coleta |
-| Tarifas e gorjetas negativas ou absurdas (ex: tarifa máxima de USD 998.310 no amarelo; gorjeta de USD 900 no verde) | Amarelo e verde | Removidas tarifa negativa, gorjeta negativa ou acima de USD 100 |
-| Tarifa por milha fora do padrão (outliers) | Amarelo, verde e HVFHS | Limiar pela regra do IQR: USD 30,75/mi (amarelo), 31 (verde) e 13,58 (HVFHS) |
+| Distância zero | Amarelo, Verde | Removidos pela regra tarifa/distância (a divisão por zero resulta em nulo, e o registro é descartado) |
+| Distância zero | HVFHS | Removidos (`trip_miles > 0`), pois não há como distinguir cancelamento de erro de coleta |
+| Tarifas e gorjetas negativas ou absurdas (ex: tarifa máxima de USD 998.310 no amarelo; gorjeta de USD 900 no verde) | Amarelo e Verde | Removidas tarifas negativas e gorjetas negativas ou acima de USD 100 |
+| Tarifa por milha fora do padrão (outliers) | Amarelo, Verde e HVFHS | Limiar pela regra do IQR: USD 30,75/mi (amarelo), USD 31/mi (verde) e USD 13,58/mi (HVFHS) |
 | Valores negativos de tarifa base e remuneração do motorista | HVFHS | Removidos (`base_passenger_fare` e `driver_pay >= 0`) |
 | `RatecodeID` nulo, fora do dicionário de dados | Amarelo, Verde | Registros removidos |
 | `payment_type` nulo, fora do dicionário de dados | Verde | Registros removidos |
@@ -478,9 +478,13 @@ Nos táxis verdes, a predominância do cartão de crédito é mais recente: até
 Para responder à pergunta de negócio, foi selecionado uma janela de período dos últimos 3 anos.
 
 Não conformidades por empresa prestadora de serviço
+
 <img width="612" height="116" alt="image" src="https://github.com/user-attachments/assets/f551e815-49f3-4706-8fd2-c8b8c08e275b" />
+
 <br>
+
 Não conformidade por motivo
+
 <img width="645" height="146" alt="image" src="https://github.com/user-attachments/assets/c22840ec-0d40-45ec-b2d3-7f5c22dcfaee" />
 <br>
 
@@ -594,4 +598,5 @@ Como oportunidades de melhorias futuras do trabalho, entendo ser oportuno:
 Referências
 ===
 https://taxicabs.nyc/
+
 https://cityofnewyork.github.io/opendatatsm/LocalLaw11of2012.html

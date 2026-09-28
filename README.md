@@ -371,9 +371,9 @@ As etapas e notebooks utilizados no pipeline são descritas na tabela abaixo.
 
 | Notebook | Camada / Processo | Entrega |
 |---|---|---|
-| [`02. Staging`]([link](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/02.%20Staging.ipynb)) | Staging | Download dos arquivos `.parquet` (yellow, green, fhv, fhvhv) e dados auxiliares (feriados) |
-| [`03. Análises de Schema`]([link]([https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/02.%20Staging.ipynb](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/03.%20An%C3%A1lises%20de%20Schema.ipynb))) | Análises de schema | Avaliação de diferenças de tipagem de dados nos campos dos arquivos `.parquet` das bases brutas da TLC. |
-| [`04. Bronze`]([link](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/04.%20Bronze.ipynb)) | Bronze | Unificação de schema e ingestão dos dados brutos: `bronze_yellow`, `bronze_green`, `bronze_fhv`, `bronze_fhvhv` |
+| [`02. Staging`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/02.%20Staging.ipynb) | Staging | Download dos arquivos `.parquet` (yellow, green, fhv, fhvhv) e dados auxiliares (feriados) |
+| [`03. Análises de Schema`]([https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/02.%20Staging.ipynb](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/03.%20An%C3%A1lises%20de%20Schema.ipynb)) | Análises de schema | Avaliação de diferenças de tipagem de dados nos campos dos arquivos `.parquet` das bases brutas da TLC. |
+| [`04. Bronze`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/04.%20Bronze.ipynb) | Bronze | Unificação de schema e ingestão dos dados brutos: `bronze_yellow`, `bronze_green`, `bronze_fhv`, `bronze_fhvhv` |
 | [`03. Silver`](link) | Silver | Filtros de qualidade e transformações: `silver_...` |
 | [`04. Gold`](link) | Gold | Modelo dimensional: `dim_calendario`, `dim_tipo_veiculo`, `dim_zonas_de_taxi`, `fato_corrida_mensal`, `fato_demanda_horaria`, `fato_corridas_suspeitas` |
 

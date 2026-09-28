@@ -374,9 +374,9 @@ As etapas e notebooks utilizados no pipeline são descritas na tabela abaixo.
 | [`02. Staging`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/02.%20Staging.ipynb) | Staging | Download dos arquivos `.parquet` (yellow, green, fhv, fhvhv) e dados auxiliares (feriados) |
 | [`03. Análises de Schema`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/03.%20An%C3%A1lises%20de%20Schema.ipynb) | Análises de schema | Avaliação de diferenças de tipagem de dados nos campos dos arquivos `.parquet` das bases brutas da TLC. |
 | [`04. Bronze`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/04.%20Bronze.ipynb) | Bronze | Unificação de schema e ingestão dos dados brutos: `yellowTaxiTripData`, `greenTaxiTripData`, `forHireVehicles`, `forHireVehiclesHighVolume`, `taxi_zone_lookup`, `fhv_base_lookup`, `Feriados_US_NY`, `Inflacao_CPI_U`, `Inflacao_CPI_T` |
-| [`05. Data Quality`](link) | Qualidade dos Dados | Análise exploratória dos dados para avaliar completude, acurácia, acurácia e outliers |
-| [`06. Silver`](link) | Silver | Filtros de qualidade e transformações |
-| [`07. Gold`](link) | Gold | Modelo Dimensional: `dim_calendario`, `dim_zonas_de_taxi`, `dim_tipo_veiculo`, `fato_demanda_horaria`, `fato_corrida_mensal`, `fato_corridas_suspeitas`, `fato_inflacao_cpi` |
+| [`05. Data Quality`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/05.%20Data%20Quality.ipynb) | Qualidade dos Dados | Análise exploratória dos dados para avaliar completude, acurácia, acurácia e outliers |
+| [`06. Silver`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/06.%20Silver.ipynb) | Silver | Filtros de qualidade e transformações |
+| [`07. Gold`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/07.%20Gold.ipynb) | Gold | Modelo Dimensional: `dim_calendario`, `dim_zonas_de_taxi`, `dim_tipo_veiculo`, `fato_demanda_horaria`, `fato_corrida_mensal`, `fato_corridas_suspeitas`, `fato_inflacao_cpi` |
 
 
 ---

@@ -24,7 +24,7 @@ Por fim, temos ainda questões de custo ao consumidor e remuneração do motoris
 >
 >3 - Qual o método de pagamento predominante para os taxis verdes e amarelos nos últimos anos? Como essa distribuição mudou na última década?
 >
->4 - Existem registros de corridas suspeitas realizadas por Taxis Amarelos e Verdes? Por corrida suspeita, entende-se como aquelas que não estão de acordo com a >legislação de Taxis da cidade: Taxis Amarelos não podem buscar passageiros fora da cidade de Nova Iorque, e Taxis Verdes não podem: Buscar passageiros fora de Nova >Iorque, Buscar passageiros de Aeroportos exceto quando a corrida tem tarifa pré combinada, buscar passageiros em zonas exclusivas de taxis amarelos (abaixo da rua XX >de Manhattan).
+>4 - Existem registros de corridas suspeitas realizadas por Taxis Amarelos e Verdes? Por corrida suspeita, entende-se como aquelas que não estão de acordo com a >legislação de Taxis da cidade: Táxis amarelos e verdes não podem buscar passageiros fora da cidade de Nova Iorque, e Taxis Verdes não podem: Buscar passageiros de >Aeroportos exceto quando a corrida tem tarifa pré combinada, buscar passageiros em zonas exclusivas de taxis amarelos.
 >
 >5 - Quais serviços de corrida por aplicativo ou taxi dominam em cada distrito? Quais são os 5 principais bairros de pico para embarque e desembarque durante o ano, >considerando dias úteis e não úteis de 2025 e 2026?
 >
@@ -378,10 +378,220 @@ As etapas e notebooks utilizados no pipeline são descritas na tabela abaixo.
 | [`06. Silver`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/06.%20Silver.ipynb) | Silver | Filtros de qualidade e transformações |
 | [`07. Gold`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/07.%20Gold.ipynb) | Gold | Modelo Dimensional: `dim_calendario`, `dim_zonas_de_taxi`, `dim_tipo_veiculo`, `fato_demanda_horaria`, `fato_corrida_mensal`, `fato_corridas_suspeitas`, `fato_inflacao_cpi` |
 
+---
+### 4.1 Screenshots e evidências de persistência de tabelas
+
+<img width="326" height="381" alt="image" src="https://github.com/user-attachments/assets/50f1cee6-6862-48e3-b2af-ec03641b8f95" />
+
+<img width="336" height="390" alt="image" src="https://github.com/user-attachments/assets/e53fd238-7ae6-4463-9aa2-6c9d06b6c2da" />
+
+<img width="353" height="311" alt="image" src="https://github.com/user-attachments/assets/2ec9aefe-7d27-4883-9a74-d84b260fb8ea" />
+
+### 4.2. Qualidade dos Dados
+
+A qualidade dos dados foi explorada no notebook [`03. Análises de Schema`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/03.%20An%C3%A1lises%20de%20Schema.ipynb), entre as etapas da camada `staging` e `bronze` e no notebook [`05. Data Quality`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/05.%20Data%20Quality.ipynb), entre a camada `bronze` e `silver`.
+
+Os principais problemas e resoluções abordados nos notebooks foram resumidos no quadro abaixo.
+
+### Problemas de schema (staging → bronze)
+
+| Problema | Onde | Tratamento |
+|---|---|---|
+| Tipos divergentes para o mesmo campo entre arquivos (`long`, `int`, `double`), ex: `PULocationID`, `DOLocationID`, `RatecodeID`, `passenger_count` | Todas as bases em `.parquet` da TLC | `StructType` único com o tipo mais permissivo por campo, e conversão de cada arquivo ao schema antes do `append` |
+| Coluna renomeada convivendo com a antiga (vazia) no mesmo arquivo: `Airport_fee` × `airport_fee` | Amarelo e HVFHS (2025+) | Função `dedupe_airport_fee` une as duas em `airport_fee` |
+| Colunas criadas ao longo do tempo (`dropoff_datetime`, `DOlocationID` na FHV; `cbd_congestion_fee` a partir de 2025) | FHV, todas as bases | Colunas ausentes preenchidas com `NULL` na conformação de schema |
+| `mergeSchema` indisponível no Databricks Free Edition | Todas as bases | Diagnóstico com `leituraParquet` e conformação manual arquivo a arquivo |
+
+### Problemas de conteúdo (bronze → silver)
+
+| Problema | Base | Tratamento na silver |
+|---|---|---|---|
+| Desembarque anterior ao embarque | Amarelo, Verde, FHV, HVFHS | Registros removidos. Em FHV o filtro é aplicado apenas a partir de 2018, pois até meados de 2017 o campo não era registrado na base |
+| Mês/ano de embarque incompatível com o arquivo de origem (inclui datas fora de 2016 a 2026) | Amarelo, Verde, FHV | Registros removidos |
+| Distâncias negativas | Amarelo, Verde | Removidos (`trip_distance >= 0`) |
+| Distância zero | Amarelo, Verde | Removidos pela regra tarifa/distância (remove por resultar em divisão por zero) |
+| Distância | HVFHS | Removidos (`trip_miles > 0`), pois não há como distinguir cancelamento de erro de coleta |
+| Tarifas e gorjetas negativas ou absurdas (ex: tarifa máxima de USD 998.310 no amarelo; gorjeta de USD 900 no verde) | Amarelo e verde | Removidas tarifa negativa, gorjeta negativa ou acima de USD 100 |
+| Tarifa por milha fora do padrão (outliers) | Amarelo, verde e HVFHS | Limiar pela regra do IQR: USD 30,75/mi (amarelo), 31 (verde) e 13,58 (HVFHS) |
+| Valores negativos de tarifa base e remuneração do motorista | HVFHS | Removidos (`base_passenger_fare` e `driver_pay >= 0`) |
+| `RatecodeID` nulo, fora do dicionário de dados | Amarelo, Verde | Registros removidos |
+| `payment_type` nulo, fora do dicionário de dados | Verde | Registros removidos |
+| Locais de embarque/desembarque desconhecidos (código 264) | Amarelo, Verde e HVFHS | Removidos (código 264), por não responderem às perguntas de negócio |
+| Viagens de aplicativo na base FHV após a criação da HVFHS | FHV | Mantido apenas até jan/2019, quando a HVFHS passou a registrar essas viagens (Local Law 149/2018) |
+| Base FHV mistura operadoras de aplicativo e outras bases | FHV | Filtro por `fhv_base_lookup`, mantendo apenas Uber, Lyft, Via e Juno |
+| Campos de desembarque e localização não obrigatórios na FHV antes de 2018 | FHV | Validações de destino aplicadas somente a partir de 2018 |
+| Feriados com data oficial e data observada duplicadas | Feriados | Mantida apenas a data efetivamente observada |
+| Meses sem valor divulgado de inflação | CPI-U e CPI-T | Imputação pela média entre o mês anterior e o seguinte, sinalizada em `fl_imputado` |
+
+## 5. Análise dos Dados
+
+Os códigos usados para as análises de dados estão disponíveis em [`08. Análises`](https://github.com/Atom-thor/PUC-MVP-2026-Engenharia_Dados/blob/main/Notebooks/08.%20An%C3%A1lises.ipynb)
+
+* 1 - Como tem evoluído a participação do marketshare dos serviços de táxi legado frente aos serviços de corrida por aplicativo (For Hire Services)? Qual é o marketshare dos táxis no ano atual, 2026, e qual ano foi o ponto de inflexão quando as corridas do tipo "For Hire Services" passaram a dominar?
+
+<img width="1266" height="498" alt="image" src="https://github.com/user-attachments/assets/b7cdc61c-af61-4fe2-b2c1-6361203967fd" />
+<br>
+Pode se observar que o segmento "For Hire Services" já representava em 2016 39,1% do mercado de transportes pagos dentro da cidade. Esse segmento cresceu continuamente, deslocando a participação dos táxis tradicionais de forma acelerada até meados de 2020, quando amaduresceu com 85,2% de marketshare. A partir de então o segmento cresceu lentamente, chegando a 89,3% de participação do mercado em 2026.
+
+O ponto de inflexão da dominância dos tradicionais táxis amarelos e verdes foi em meados de 2017, mais especificamente em janeiro, quando atingiu o marco de 50,37% de mercado.
+
+Esse fenômeno mostra que os serviços de transporte por aplicativo de alto volume oferecem algum tipo de vantagem ao passageiro que os táxis não conseguiram competir, podendo ser desde a qualidade do veículo, valor cobrado ao consumidor, ou praticidade de uso, demandando apenas demandar uma viagem via celular.
+
+* 2 - Qual a taxa de corridas disputadas e nulas para táxis verdes e amarelos nos últimos 4 anos? Esse percentual tem aumentado ou diminuido?
+
+Corridas Disputadas
+<img width="1262" height="492" alt="image" src="https://github.com/user-attachments/assets/0a1c31c4-6c88-4f5f-a5da-3c9ab5042077" />
+<br>
+
+Corridas anuladas
+<img width="1256" height="497" alt="image" src="https://github.com/user-attachments/assets/6210d579-5fcf-4e6e-afe3-ef4614ae797a" />
+<br>
+
+Corridas sem cobrança
+<img width="1261" height="492" alt="image" src="https://github.com/user-attachments/assets/3cbaf33e-adf1-4ca0-bfc0-1c5285e5e48f" />
+<br>
+
+Observa-se que, nos últimos quatro anos, as taxas de corridas disputadas, anuladas e sem cobrança representaram um percentual baixo (< 2%) do total de corridas dos táxis amarelos e verdes.
+
+Não foram registradas corridas anuladas no período. No entanto, isso pode ser efeito dos filtros de qualidade aplicados na camada `silver`, como a remoção de corridas com início e fim desconhecidos, uma interação de filtros que não foi explorada na análise de dados.
+
+A taxa de corridas disputadas permaneceu estável para os táxis verdes (0,07% a 0,09% do total), enquanto para os táxis amarelos aumentou de 0,63% em 2023 para 1,43% em 2025. No ano atual, esse percentual caiu para 0,59%, o que indica que os provedores de serviço do táxi amarelo podem ter realizado ajustes operacionais para melhorar o indicador.
+
+Quanto às corridas sem cobrança, tanto os táxis verdes quanto os amarelos apresentaram leve queda no período. Os táxis amarelos reduziram a incidência de 0,35% em 2023 para 0,26% em 2026, enquanto os verdes reduziram de 0,33% para 0,20% no mesmo intervalo.
+
+* 3 - Qual o método de pagamento predominante para os táxis verdes e amarelos nos últimos anos? Como essa distribuição mudou na última década?
+
+Métodos de pagamento para táxis amarelos
+<img width="1261" height="493" alt="image" src="https://github.com/user-attachments/assets/d0dcb68e-f78b-437c-a0b8-49379ec0f8e6" />
+<br>
+
+Métodos de pagamento para táxis verdes
+<img width="1262" height="497" alt="image" src="https://github.com/user-attachments/assets/ee3a5a2f-1558-4781-96e9-b74787560098" />
+<br>
+
+Para os táxis amarelos, o cartão de crédito é a forma predominante de pagamento desde 2016, tendo crescido continuamente desde então até representar 88,5% do total de meios de pagamento, sem considerar as corridas disputadas, anuladas e desconhecidas.
+
+Nos táxis verdes, a predominância do cartão de crédito é mais recente: até meados de 2020, a participação do cartão e a do dinheiro eram aproximadamente iguais, e foi a partir de 2021 que o cartão passou a crescer continuamente. O dinheiro ainda corresponde a 22,8% das transações, o que sugere diferenças de perfil entre os passageiros de Manhattan, onde predomina o táxi amarelo, e os dos demais distritos, onde operam os táxis verdes.
+
+* 4 - Existem registros de corridas suspeitas realizadas por Taxis Amarelos e Verdes? Por corrida suspeita, entende-se como aquelas que não estão de acordo com a legislação de Taxis da cidade: Táxis amarelos e verdes não podem buscar passageiros fora da cidade de Nova Iorque, e Taxis Verdes não podem: Buscar passageiros de Aeroportos exceto quando a corrida tem tarifa pré combinada, buscar passageiros em zonas exclusivas de taxis amarelos.
+
+Para responder à pergunta de negócio, foi selecionado uma janela de período dos últimos 3 anos.
+
+Não conformidades por empresa prestadora de serviço
+<img width="612" height="116" alt="image" src="https://github.com/user-attachments/assets/f551e815-49f3-4706-8fd2-c8b8c08e275b" />
+<br>
+Não conformidade por motivo
+<img width="645" height="146" alt="image" src="https://github.com/user-attachments/assets/c22840ec-0d40-45ec-b2d3-7f5c22dcfaee" />
+<br>
+
+A empresa com maior incidência de irregularidades é a Curb Mobility, LLC, com 95.575 incidentes nos últimos três anos. Embora esse número seja significativamente superior ao da Creative Mobile Technologies, não é possível saber se a diferença decorre de uma maior irregularidade dessa empresa ou simplesmente de ela atender a uma quantidade maior de corridas de táxi.
+
+De toda forma, existem de fato não conformidades e, entre as duas empresas, o principal motivo está relacionado ao embarque de passageiros por táxis verdes em zonas de atendimento exclusivo para táxis amarelos, o que é vetado pelos regulamentos da TLC.
+
+Em seguida, o embarque de passageiros fora da cidade de Nova Iorque também ocorre com alta frequência. Trata-se de outra não conformidade, uma vez que a TLC não possui jurisdição para regulamentar serviços de *street hail* e *livery* fora da cidade. Vale notar que o desembarque fora da cidade é permitido; apenas o embarque é vetado.
+
+A não conformidade de táxis verdes realizarem embarque em aeroportos sem tarifa negociada ocorreu apenas 390 vezes desde 2024. Isso sugere que essa infração é mais fiscalizada, ou que ela não gera vantagem direta ao motorista, ao contrário do embarque em zonas exclusivas de táxis amarelos, que pode ocorrer, por exemplo, quando o motorista já está no local desembarcando outro passageiro.
+
+A existência desses registros aponta oportunidades de melhoria no *compliance* das empresas prestadoras desses serviços aos seus motoristas, no rastreamento de veículos e motoristas e na supervisão da TLC sobre as operadoras credenciadas.
+
+* 5 - Quais serviços de corrida por aplicativo ou taxi dominam em cada distrito? Quais são os 5 principais bairros de pico para embarque e desembarque durante o ano, considerando dias úteis e não úteis de 2025 e 2026?
+
+Predominância de provedor de serviço de transporte por distrito
+<img width="1265" height="500" alt="image" src="https://github.com/user-attachments/assets/d50498ab-2a29-4109-ad02-d9db5f3b57ab" />
+<br>
+
+Em praticamente todos os distritos, o provedor dominante de viagens é a Uber, exceto para o aeroporto internacional Newark Liberty, onde os taxis amarelos ainda predominam, com 97,49% dos registros de embarque. Nos demais distritos da cidade, apenas Manhattan possuí os taxis amarelos como o segundo provedor mais comum, lugar esse tomado pela Lyft, outro provedor de corridas por aplicativo.
+
+<br>
+Principais locais para embarque
+<img width="1263" height="542" alt="image" src="https://github.com/user-attachments/assets/aee7ac83-198e-4beb-97f1-fe01b37cc871" />
+<br>
+Os cinco principais bairros e locais de embarque, em ordem decrescente de demanda, são:
+
+**Em fins de semana e feriados:**
+
+1. Aeroporto JFK
+2. Aeroporto de LaGuardia
+3. East Village
+4. Bushwick South
+5. Crown Heights
+
+**Em dias úteis:**
+
+1. Aeroporto de LaGuardia
+2. Aeroporto JFK
+3. Midtown Center
+4. Upper East Side South
+5. Times Sq/Theatre District
+
+Observou-se que há variação entre os bairros mais demandados nos dois tipos de dia e que o volume de viagens é menor nos fins de semana, o que indica um menor fluxo de pessoas no interior da cidade e também de deslocamentos de e para fora dela.
+
+Principais locais para desembarque
+<img width="1268" height="552" alt="image" src="https://github.com/user-attachments/assets/b027b8a4-ab0d-43ff-b670-a3c055dd3fa2" />
+<br>
+
+Os cinco principais bairros e locais de desembarque, em ordem decrescente de demanda, são:
+
+**Em fins de semana e feriados:**
+
+1. Local fora da cidade
+2. Aeroporto JFK
+3. Aeroporto LaGuardia
+4. Crown Heights North
+5. Bushwick South
+
+**Em dias úteis:**
+
+1. Local fora da cidade
+2. Aeroporto LaGuardia
+3. Aeroporto JFK
+4. Midtown Center
+5. Upper East Side North
+
+O principal destino de desembarque em Nova Iorque é um local fora da cidade, o que indica um alto fluxo de pessoas saindo da cidade.
+
+* 6 - Quais são os horários de pico, para embarque e desembarque, por distrito, em dias úteis e não úteis?
+
+<img width="1267" height="412" alt="image" src="https://github.com/user-attachments/assets/c4075fdd-cc75-4783-bfef-9a54bcf540eb" />
+<img width="1268" height="407" alt="image" src="https://github.com/user-attachments/assets/37b6817d-3779-4bb7-b402-a6c35bebb702" />
+
+<br>
+
+O distrito de Manhattan é, de longe, o local com maior fluxo de pessoas embarcando e desembarcando em toda a cidade, independentemente do período ser dia últil ou feriado/finais de semana. Pela leitura do gráfico, observase que o fluxo de carros é intenso a partir 6-7 da manhã, atingindo um pico entre as 18-19 horas da noite, e decrescendo nas horas seguintes. Nos finais de semana e feriados a demanda de veículos continua alta até meados de 2 horas da manhã.
+A demanda nos outros distritos é insignificante, de acordo com a escala gráfica
+
+
+* 8 - Como as tarifas base ao passageiro (sem incluir impostos, gorjetas e taxas) tem acompanhado a inflação geral americana, e a inflação especifica do segmento de transportes? As regulamentações do setor taxista fazem com que ela tenha sofrido menos ou mais reajustes na inflação com relação a corridas por aplicativo?
+
+<img width="1273" height="638" alt="image" src="https://github.com/user-attachments/assets/9370d89d-7f2e-4f0d-a9da-bf13f9109eb0" />
+
+<img width="465" height="111" alt="image" src="https://github.com/user-attachments/assets/5a27703f-1ea0-46f5-97ce-5949a8b9a380" />
+
+<img width="1272" height="628" alt="image" src="https://github.com/user-attachments/assets/aee9f86c-0cd3-47da-8cdb-2017310a6bda" />
+
+
+Pode-se observar que a remuneração dos motoristas do segmento "For Hire Services" tem crescido significativamente mais que a inflação geral. Para comparativos, a remuneração dos motoristas cresceu 83,5% com relação ao baseline de fevereiro de 2019, versus uma inflação acumulada de 31,3%.
+
+Já o custo de transportes de táxi tem crescido 46,1% no mesmo período, versus uma inflação do segmento de transportes de 37,7%.
+
+## Autoavaliação
+
+Primeiramente, gostaria de agradecer à equipe de docentes da PUC pela mentoria e oportunidade de desenvolver esse trabalho. Independentemente da nota que eu eventualmente tirar nesse trabalho, sinto que aprendi muito sobre engenharia de dados e construção de pipelines.
+
+Quanto ao desempenho do trabalho, sinto que eu poderia ter me dedicado mais à construção das etapas de processamento em si. Acabei gastando um tempo muito longo na ingestão dos dados por meio de download automático de arquivos parquet, e desenvolvimento de menos perguntas de negócio e maior focalização nas respostas analíticas, visto a complexidade da base de dados e grande possibilidade de perguntas de negócio a serem respondidas.
+
+Como oportunidades de melhorias futuras do trabalho, entendo ser oportuno:
+
+* A construção de um orquestrador para atualização mensal dos dados
+* A ingestão da etapa de monitoramento de qualidade de dados e integridade de schema para monitoramento constante, visto que a TLC está constantemente mudando o schema das bases
+* A ingestão automática de dados de inflação por meio dos bancos de dados do FRED
+* A modificação do método de atualização das tabelas nas camadas bronze e silver, para que sejam atualizados pelo modo append em vez de overwrite, para economizar processamento do banco de dados
+* A deleção automática de arquivos .parquet após uma certa janela de retenção, para economizar espaço de armazenamento.
+
 
 ---
 
 Referências
 ===
-Fonte: https://taxicabs.nyc/
+https://taxicabs.nyc/
 https://cityofnewyork.github.io/opendatatsm/LocalLaw11of2012.html
